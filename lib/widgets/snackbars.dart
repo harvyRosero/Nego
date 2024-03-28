@@ -5,9 +5,9 @@ import 'package:agro/utils/app_colors.dart';
 class SnackbarUtils {
   static SnackbarController success(String message) {
     return Get.snackbar(
-      "Éxito",
+      "OK",
       message,
-      backgroundColor: AppColors.verdeButtons,
+      backgroundColor: AppColors.verdeNavbar,
       colorText: Colors.white,
     );
   }

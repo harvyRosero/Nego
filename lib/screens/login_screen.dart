@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:agro/controllers/login_controller.dart';
+import 'package:agro/utils/app_colors.dart';
 
 class LoginScreen extends StatelessWidget {
   LoginScreen({super.key});
@@ -36,7 +37,10 @@ class LoginScreen extends StatelessWidget {
                     height: 24, // Ajusta el tamaño según sea necesario
                     width: 24,
                   ),
-                  label: const Text('Iniciar Sesión con Google'),
+                  label: const Text(
+                    'Iniciar Sesión con Google',
+                    style: TextStyle(color: AppColors.marron),
+                  ),
                 ),
 
                 const SizedBox(height: 200),

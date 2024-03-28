@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
-
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:agro/controllers/home_controller.dart';
 import 'package:agro/utils/app_colors.dart';
 import 'package:agro/screens/me_screen.dart';
