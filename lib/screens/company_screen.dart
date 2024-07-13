@@ -4,10 +4,12 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:agro/utils/app_colors.dart';
 import 'package:get/get.dart';
 import 'package:agro/controllers/companies_controller.dart';
-import 'package:agro/widgets/cards_companies_widget.dart';
+import 'package:agro/widgets/card_company_widget.dart';
+import 'package:agro/widgets/card_transportis_widget.dart';
+import 'package:agro/widgets/card_store_widget.dart';
 
 class CompanyScreen extends StatelessWidget {
-  CompanyScreen({Key? key}) : super(key: key); // Corrección aquí
+  CompanyScreen({Key? key}) : super(key: key);
 
   final CompaniesController companiesController =
       Get.put(CompaniesController());
@@ -44,15 +46,20 @@ class CompanyScreen extends StatelessWidget {
           );
         } else {
           return ListView.builder(
+            shrinkWrap: true,
             itemCount: snapshot.data!.docs.length,
             itemBuilder: (context, index) {
               DocumentSnapshot doc = snapshot.data!.docs[index];
               if (doc['categoria'] == 'Empresa Agricultora') {
                 return buildCompanyCard(
                   nombre: doc['nombre'],
+                  categoria: doc['categoria'],
+                  fechaCreacion: doc['fechaCreacion'],
+                  imagePortada: doc['imagePortada'],
                   descripcion: doc['descripcion'],
                   departamento: doc['departamento'],
                   producto: doc['producto'],
+                  estado: doc['estado'],
                   imagenUrl: doc['imagePerfil'],
                   lugarCercano: doc['lugarCercano'],
                   ubicacion: doc['ubicacion'],
@@ -84,11 +91,17 @@ class CompanyScreen extends StatelessWidget {
               if (doc['categoria'] == 'Transportista') {
                 return buildTransportistCard(
                   nombre: doc['nombre'],
+                  categoria: doc['categoria'],
+                  descripcion: doc['descripcion'],
+                  imagePortada: doc['imagePortada'],
                   camion: doc['camion'],
                   image: doc['image'],
                   capacidadCarga: doc['capacidadCarga'],
+                  tipoCarga: doc['tipoCarga'],
                   ubicacion: doc['ubicacion'],
+                  departamento: doc['departamento'],
                   contacto: doc['contacto'],
+                  fechaCreacion: doc['fechaCreacion'],
                 );
               } else {
                 return Container();
@@ -115,10 +128,16 @@ class CompanyScreen extends StatelessWidget {
               DocumentSnapshot doc = snapshot.data!.docs[index];
               if (doc['categoria'] == 'Tienda') {
                 return buildStoreCard(
+                    context: context,
                     tienda: doc['tienda'],
+                    categoria: doc['categoria'],
                     ubicacion: doc['ubicacion'],
                     contacto: doc['contacto'],
-                    image: doc['image']);
+                    image: doc['image'],
+                    departamento: doc['departamento'],
+                    descripcion: doc['descripcion'],
+                    fechaCreacion: doc['fechaCreacion'],
+                    imagePortada: doc['imagePortada']);
               } else {
                 return Container();
               }

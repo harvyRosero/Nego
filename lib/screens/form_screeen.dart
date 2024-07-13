@@ -14,12 +14,14 @@ class FormScreen extends StatelessWidget {
   final TextEditingController productoController = TextEditingController();
   final TextEditingController contactoController = TextEditingController();
   final TextEditingController stateController = TextEditingController();
+  final TextEditingController statusController = TextEditingController();
   final TextEditingController descriptionController = TextEditingController();
 
   final TextEditingController nombreConductorController =
       TextEditingController();
   final TextEditingController camionController = TextEditingController();
   final TextEditingController capacidadController = TextEditingController();
+  final TextEditingController tipoCargaController = TextEditingController();
 
   final FormController formController = Get.put(FormController());
 
@@ -114,6 +116,8 @@ class FormScreen extends StatelessWidget {
                   'Ciudad cercana (Ejemplo: Bogota)', 30),
               _buildTextFormField(productoController,
                   'Producto que produce (Ejmeplo: Papa)', 30),
+              _buildTextFormField(statusController,
+                  'Estado (Ejeplo: En siembra - En cosecha)', 20),
               _buildTextFormField(
                   contactoController, 'Contacto (Ejemplo: WhatsApp)', 30),
               const SizedBox(height: 20),
@@ -132,6 +136,7 @@ class FormScreen extends StatelessWidget {
                             ubicacionController.text,
                             ciudadCercanaController.text,
                             productoController.text,
+                            statusController.text,
                             contactoController.text,
                           );
                         },
@@ -183,9 +188,15 @@ class FormScreen extends StatelessWidget {
               _buildTextFormField(
                   camionController, 'Camion (Ejemplo: Hino Sg1a)', 50),
               _buildTextFormField(
-                  ubicacionController, 'Ubicacion (Ciudad)', 30),
+                  ubicacionController, 'Ubicacion (Ciudad, pueblo)', 30),
+              _buildTextFormField(
+                  stateController, 'Departamento (Ejmplo: Meta)', 30),
               _buildTextFormField(capacidadController,
-                  'capacidad camion (Ejemplo: 500 Kg)', 30),
+                  'capacidad de carga (Ejemplo: 500 Kg)', 30),
+              _buildTextFormField(
+                  tipoCargaController,
+                  'Tipo de carga (Ejemplo : refrigerantes, animales, productos)',
+                  30),
               _buildTextFormField(
                   contactoController, 'Contacto (WhatsApp)', 30),
               const SizedBox(height: 20),
@@ -202,7 +213,9 @@ class FormScreen extends StatelessWidget {
                               descriptionController.text,
                               camionController.text,
                               ubicacionController.text,
+                              stateController.text,
                               capacidadController.text,
+                              tipoCargaController.text,
                               contactoController.text);
                         },
                         child: const Text('Enviar'),
@@ -226,7 +239,8 @@ class FormScreen extends StatelessWidget {
             children: <Widget>[
               _buildTextFormField(nombreTiendaController, 'Tienda', 30),
               _buildTextFormField(descriptionController, 'Descripcion', 300),
-              _buildTextFormField(ubicacionController, 'Ubicacion', 30),
+              _buildTextFormField(stateController, 'Departamento', 20),
+              _buildTextFormField(ubicacionController, 'Direccion', 50),
               _buildTextFormField(contactoController, 'Contacto', 30),
               const SizedBox(height: 20),
               Obx(() {
@@ -238,10 +252,12 @@ class FormScreen extends StatelessWidget {
                         style: _enviarButtonStyle,
                         onPressed: () {
                           formController.validateAndSendDataStore(
-                              nombreTiendaController.text,
-                              descriptionController.text,
-                              ubicacionController.text,
-                              contactoController.text);
+                            nombreTiendaController.text,
+                            descriptionController.text,
+                            ubicacionController.text,
+                            stateController.text,
+                            contactoController.text,
+                          );
                         },
                         child: const Text('Enviar'),
                       );

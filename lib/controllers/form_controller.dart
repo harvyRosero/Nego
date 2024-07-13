@@ -49,6 +49,7 @@ class FormController extends GetxController {
       String downloadURL = await referenceImagesToUpload.getDownloadURL();
       return downloadURL; // La imagen se cargó con éxito
     } catch (e) {
+      isButtonSelected.value = false;
       SnackbarUtils.error('¡Ocurrió un error inesperado!');
       return '';
     }
@@ -67,6 +68,7 @@ class FormController extends GetxController {
       String downloadURL = await referenceImagesToUpload.getDownloadURL();
       return downloadURL;
     } catch (e) {
+      isButtonSelected.value = false;
       SnackbarUtils.error('¡Ocurrió un error inesperado!');
       return '';
     }
@@ -79,6 +81,7 @@ class FormController extends GetxController {
       ubicacion,
       lugarCercano,
       producto,
+      estado,
       contacto,
       imagePerfil,
       imagePortada,
@@ -93,6 +96,7 @@ class FormController extends GetxController {
         ubicacion: ubicacion,
         lugarCercano: lugarCercano,
         producto: producto,
+        estado: estado,
         contacto: contacto,
         userId: userId.toString(),
         imagePerfil: imagePerfil,
@@ -107,12 +111,23 @@ class FormController extends GetxController {
         .then((value) {
       SnackbarUtils.success('¡Datos enviados correctaente!');
     }).catchError((error) {
-      SnackbarUtils.error('¡Ocurrio un Error al enviar dato!');
+      isButtonSelected.value = false;
+      SnackbarUtils.error('¡Ocurrio un Error al enviar los datos!');
     });
   }
 
-  void sendDataTrasnportisToFirebase(nombre, descripcion, camion, ubicacion,
-      capacidad, contacto, image, imagePortada) async {
+  void sendDataTrasnportisToFirebase(
+      nombre,
+      descripcion,
+      camion,
+      ubicacion,
+      departamento,
+      capacidad,
+      tipoCarga,
+      contacto,
+      image,
+      imagePortada,
+      fechaCreacion) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     String? userId = prefs.getString('uid');
     TransportistData transportistData = TransportistData(
@@ -121,11 +136,14 @@ class FormController extends GetxController {
         descripcion: descripcion,
         camion: camion,
         ubicacion: ubicacion,
+        departamento: departamento,
         capacidadCarga: capacidad,
+        tipoCarga: tipoCarga,
         contacto: contacto,
         userId: userId.toString(),
         image: image,
-        imagePortada: imagePortada);
+        imagePortada: imagePortada,
+        fechaCreacion: fechaCreacion);
 
     Map<String, dynamic> datosMapa = transportistData.toMap();
     FirebaseFirestore.instance
@@ -134,12 +152,13 @@ class FormController extends GetxController {
         .then((value) {
       SnackbarUtils.success('¡Datos enviados correctaente!');
     }).catchError((error) {
-      SnackbarUtils.error('¡Ocurrio un Error al enviar dato!');
+      isButtonSelected.value = false;
+      SnackbarUtils.error('¡Ocurrio un Error al enviar los datos!');
     });
   }
 
-  void sendDataStoreToFirebase(
-      tienda, descripcion, ubicacion, contacto, image, imagePortada) async {
+  void sendDataStoreToFirebase(tienda, descripcion, ubicacion, departamento,
+      contacto, image, imagePortada, fechaCreacion) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     String? userId = prefs.getString('uid');
     StoreData storeData = StoreData(
@@ -147,10 +166,12 @@ class FormController extends GetxController {
       tienda: tienda,
       descripcion: descripcion,
       ubicacion: ubicacion,
+      departamento: departamento,
       contacto: contacto,
       userId: userId.toString(),
       image: image,
       imagePortada: imagePortada,
+      fechaCreacion: fechaCreacion,
     );
 
     Map<String, dynamic> datosMapa = storeData.toMap();
@@ -161,7 +182,8 @@ class FormController extends GetxController {
         .then((value) {
       SnackbarUtils.success('¡Datos enviados correctaente!');
     }).catchError((error) {
-      SnackbarUtils.error('¡Ocurrio un Error al enviar dato!');
+      isButtonSelected.value = false;
+      SnackbarUtils.error('¡Ocurrio un Error al enviar los datos!');
     });
   }
 
@@ -172,6 +194,7 @@ class FormController extends GetxController {
       String ubicacion,
       String lugarCercano,
       String producto,
+      String estado,
       String contacto) async {
     DateTime now = DateTime.now();
     int year = now.year;
@@ -185,6 +208,7 @@ class FormController extends GetxController {
         ubicacion.isEmpty ||
         lugarCercano.isEmpty ||
         producto.isEmpty ||
+        estado.isEmpty ||
         contacto.isEmpty) {
       SnackbarUtils.warning('¡Debe llenar todos los campos!');
     } else {
@@ -199,6 +223,7 @@ class FormController extends GetxController {
             ubicacion,
             lugarCercano,
             producto,
+            estado,
             contacto,
             imgPerfil,
             imgPortada,
@@ -210,12 +235,15 @@ class FormController extends GetxController {
   }
 
   void validateAndSendDataTransportist(
-      String nombre,
-      String descripcion,
-      String camion,
-      String ubicacion,
-      String capacidad,
-      String contacto) async {
+    String nombre,
+    String descripcion,
+    String camion,
+    String ubicacion,
+    String departamento,
+    String capacidad,
+    String tipoCarga,
+    String contacto,
+  ) async {
     if (selectedImage.value.isEmpty) {
       SnackbarUtils.warning('Debe seleccioinar una imagen');
     }
@@ -223,23 +251,41 @@ class FormController extends GetxController {
         camion.isEmpty ||
         descripcion.isEmpty ||
         ubicacion.isEmpty ||
+        departamento.isEmpty ||
         capacidad.isEmpty ||
+        tipoCarga.isEmpty ||
         contacto.isEmpty) {
       SnackbarUtils.warning('Debe llenar todos los campos!');
     } else {
+      DateTime now = DateTime.now();
+      int year = now.year;
+      int month = now.month;
+
+      String fechaCreacion = '$month de $year';
+
       isButtonSelected.value = true;
       String urlImg = await sendImage();
       String urlImgPortada = await sendImagePortada();
       if (urlImg.isNotEmpty) {
-        sendDataTrasnportisToFirebase(nombre, descripcion, camion, ubicacion,
-            capacidad, contacto, urlImg, urlImgPortada);
+        sendDataTrasnportisToFirebase(
+            nombre,
+            descripcion,
+            camion,
+            ubicacion,
+            departamento,
+            capacidad,
+            tipoCarga,
+            contacto,
+            urlImg,
+            urlImgPortada,
+            fechaCreacion);
       }
       Get.offAllNamed('home');
     }
   }
 
   void validateAndSendDataStore(String tienda, String descripcion,
-      String ubicacion, String contacto) async {
+      String ubicacion, String departamento, String contacto) async {
     if (selectedImage.value.isEmpty) {
       SnackbarUtils.warning('Debe seleccioinar una imagen');
     }
@@ -249,12 +295,17 @@ class FormController extends GetxController {
         contacto.isEmpty) {
       SnackbarUtils.warning('Debe llenar todos los campos!');
     } else {
+      DateTime now = DateTime.now();
+      int year = now.year;
+      int month = now.month;
+
+      String fechaCreacion = '$month de $year';
       isButtonSelected.value = true;
       String urlImg = await sendImage();
       String urlImgPortada = await sendImagePortada();
       if (urlImg.isNotEmpty) {
-        sendDataStoreToFirebase(
-            tienda, descripcion, ubicacion, contacto, urlImg, urlImgPortada);
+        sendDataStoreToFirebase(tienda, descripcion, ubicacion, departamento,
+            contacto, urlImg, urlImgPortada, fechaCreacion);
       }
       Get.offAllNamed('home');
     }

@@ -6,6 +6,7 @@ class FarmData {
   String ubicacion;
   String lugarCercano;
   String producto;
+  String estado;
   String contacto;
   String userId;
   String imagePerfil;
@@ -20,6 +21,7 @@ class FarmData {
     required this.ubicacion,
     required this.lugarCercano,
     required this.producto,
+    required this.estado,
     required this.contacto,
     required this.userId,
     required this.imagePerfil,
@@ -27,7 +29,6 @@ class FarmData {
     required this.fechaCreacion,
   });
 
-  // Método para convertir los datos a un mapa (para enviar a Firebase)
   Map<String, dynamic> toMap() {
     return {
       'categoria': categoria,
@@ -37,6 +38,7 @@ class FarmData {
       'ubicacion': ubicacion,
       'lugarCercano': lugarCercano,
       'producto': producto,
+      'estado': estado,
       'contacto': contacto,
       'userId': userId,
       'imagePerfil': imagePerfil,

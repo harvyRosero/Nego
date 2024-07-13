@@ -1,19 +1,37 @@
 import 'package:flutter/material.dart';
 import 'package:agro/utils/app_colors.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:get/get.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class CompanyInfo extends StatelessWidget {
   const CompanyInfo({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final Map<String, dynamic> args = Get.arguments;
+    final String categoria = args['categoria'];
+    if (categoria == 'transportista') {
+      // final String capacidadCarga = args['capacidadCarga'];
+      // final String tipoCarga = args['tipoCarga'];
+    }
+    final String nombre = args['nombre'];
+    final String ubicacion = args['ubicacion'];
+    final String contacto = args['contacto'];
+    final String image = args['image'];
+    final String descripcion = args['descripcion'];
+    final String fechaCreacion = args['fechaCreacion'];
+    final String imagePortada = args['imagePortada'];
+    final String departamento = args['departamento'];
+
     return Scaffold(
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildHeader(),
-            _buildInfoContainer(),
+            _buildHeader(image, imagePortada, contacto),
+            _buildInfoContainer(nombre, categoria, descripcion, ubicacion,
+                departamento, fechaCreacion),
             _buildRowButton(),
           ],
         ),
@@ -22,22 +40,21 @@ class CompanyInfo extends StatelessWidget {
   }
 }
 
-Widget _buildHeader() {
+Widget _buildHeader(image, imagePortada, contacto) {
   return Stack(
     children: [
       Container(
         height: 230,
       ),
       SizedBox(
-        height: 180.0, // Altura solo para la imagen
-        child: Container(
-          width: double.infinity,
-          decoration: const BoxDecoration(
-            image: DecorationImage(
-              image: AssetImage('assets/login_img.jpg'),
-              fit: BoxFit.cover,
-            ),
-          ),
+        height: 180.0,
+        width: double.infinity, // Ocupa todo el ancho de la pantalla
+        child: CachedNetworkImage(
+          imageUrl: imagePortada,
+          fit: BoxFit.cover,
+          placeholder: (context, url) =>
+              const Center(child: CircularProgressIndicator()),
+          errorWidget: (context, url, error) => const Icon(Icons.error),
         ),
       ),
       Positioned(
@@ -56,50 +73,72 @@ Widget _buildHeader() {
           ),
           child: CircleAvatar(
             radius: 40.0,
-            backgroundImage: AssetImage('assets/gmail_logo.png'),
+            backgroundImage: NetworkImage(image),
           ),
         ),
       ),
       Positioned(
           bottom: 0,
           right: 20,
-          child: ElevatedButton.icon(
-              onPressed: () {},
-              icon: Icon(Icons.phone),
-              label: Text("WhatsApp"))),
+          child: Row(
+            children: [
+              const Icon(Icons.phone),
+              const SizedBox(
+                width: 5,
+              ),
+              Text(
+                contacto,
+                style: GoogleFonts.openSans(
+                    color: AppColors.grisLetras, fontWeight: FontWeight.bold),
+              )
+            ],
+          )),
     ],
   );
 }
 
-Widget _buildInfoContainer() {
+Widget _buildInfoContainer(
+    tienda, categoria, descripion, ubicacion, departamento, fechaCreacion) {
   return Padding(
-    padding: const EdgeInsets.only(left: 10),
+    padding: const EdgeInsets.only(
+      left: 13,
+      right: 13,
+    ),
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          "German Torees",
+          tienda,
           style:
               GoogleFonts.openSans(fontSize: 22, fontWeight: FontWeight.bold),
         ),
         Text(
-          "Agricultor",
+          categoria,
           style: GoogleFonts.openSans(
-              fontWeight: FontWeight.normal, color: AppColors.grisLetras),
+              fontWeight: FontWeight.normal,
+              fontStyle: FontStyle.italic,
+              color: AppColors.grisLetras,
+              fontSize: 14),
+        ),
+        const SizedBox(
+          height: 15,
         ),
         Text(
-          "Lorem asdfk kasjdf fksadjf ajskd fkjas fjasd fksajd fkasjd faskdjf askjd sk",
+          descripion,
           style: GoogleFonts.openSans(
               fontWeight: FontWeight.normal, color: AppColors.grisLetras),
         ),
+        const SizedBox(
+          height: 15,
+        ),
         Row(
           children: [
-            Icon(Icons.location_on),
-            SizedBox(
+            const Icon(Icons.location_on),
+            const SizedBox(
               width: 10,
             ),
             Text(
-              'Bogota',
+              ubicacion,
               style: GoogleFonts.openSans(
                   fontWeight: FontWeight.normal, color: AppColors.grisLetras),
             )
@@ -107,18 +146,31 @@ Widget _buildInfoContainer() {
         ),
         Row(
           children: [
-            Icon(Icons.calendar_month),
-            SizedBox(
+            const Icon(Icons.location_city),
+            const SizedBox(
               width: 10,
             ),
             Text(
-              'Se unio en marxo 2025',
+              departamento,
               style: GoogleFonts.openSans(
                   fontWeight: FontWeight.normal, color: AppColors.grisLetras),
             )
           ],
         ),
-        SizedBox(
+        Row(
+          children: [
+            const Icon(Icons.calendar_month),
+            const SizedBox(
+              width: 10,
+            ),
+            Text(
+              'Se unio el $fechaCreacion',
+              style: GoogleFonts.openSans(
+                  fontWeight: FontWeight.normal, color: AppColors.grisLetras),
+            )
+          ],
+        ),
+        const SizedBox(
           height: 20,
         ),
       ],
@@ -127,7 +179,7 @@ Widget _buildInfoContainer() {
 }
 
 Widget _buildRowButton() {
-  return Row(
+  return const Row(
     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
     children: [
       InkWell(

@@ -15,7 +15,6 @@ class LoginController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    // Observador para el usuario actual
     user.bindStream(_auth.authStateChanges());
   }
 
