@@ -6,11 +6,11 @@ import 'package:agro/controllers/ad_maker_controller.dart';
 // import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 
-class AdMakerScreen extends StatelessWidget {
+class AdMakerWidget extends StatelessWidget {
   final AdMakerController adMakerController = Get.put(AdMakerController());
   final TextEditingController _controller = TextEditingController();
 
-  AdMakerScreen({Key? key}) : super(key: key);
+  AdMakerWidget({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -31,8 +31,6 @@ class AdMakerScreen extends StatelessWidget {
                 _buildTextInputSection(),
               ],
             ),
-            _buildCheckList(),
-            const SizedBox(height: 40)
           ],
         ),
       ),
@@ -48,37 +46,41 @@ class AdMakerScreen extends StatelessWidget {
           Navigator.of(context).pop();
         },
       ),
-      actions: [
-        _buildPublishButton(context),
-      ],
+      actions: [_buildPublishButton(context)],
     );
   }
 
   // Publish button widget
   Widget _buildPublishButton(BuildContext context) {
     return Padding(
-        padding: const EdgeInsets.only(right: 20.0),
-        child: ElevatedButton(
-          onPressed: () async {
+      padding: const EdgeInsets.only(right: 20.0),
+      child: Obx(() {
+        return ElevatedButton(
+          onPressed: () {
             adMakerController.sendDataPublication(_controller.text);
-            _controller.text = '';
           },
           style: ElevatedButton.styleFrom(
-            backgroundColor: AppColors.verdeNavbar,
+            backgroundColor: adMakerController.isLoading.value
+                ? Colors.grey
+                : AppColors.verdeNavbar,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(20),
             ),
             padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 5),
           ),
-          child: const Text(
-            "Publicar",
-            style: TextStyle(
-              fontSize: 15,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
-            ),
-          ),
-        ));
+          child: adMakerController.isLoading.value
+              ? const CircularProgressIndicator(color: AppColors.blanco)
+              : const Text(
+                  "Publicar",
+                  style: TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.blanco,
+                  ),
+                ),
+        );
+      }),
+    );
   }
 
   // Profile image widget with CircleAvatar
@@ -156,38 +158,6 @@ class AdMakerScreen extends StatelessWidget {
           ],
         ),
       ),
-    );
-  }
-
-  // Checklist widget
-  Widget _buildCheckList() {
-    return Column(
-      children: [
-        Obx(() => RadioListTile<String>(
-              title: const Text('Publicación normal'),
-              value: 'publicacion_normal',
-              groupValue: adMakerController.selectedOption.value,
-              onChanged: (value) {
-                adMakerController.selectedOption.value = value!;
-              },
-            )),
-        Obx(() => RadioListTile<String>(
-              title: const Text('Producto'),
-              value: 'producto',
-              groupValue: adMakerController.selectedOption.value,
-              onChanged: (value) {
-                adMakerController.selectedOption.value = value!;
-              },
-            )),
-        Obx(() => RadioListTile<String>(
-              title: const Text('Oferta de trabajo'),
-              value: 'oferta_trabajo',
-              groupValue: adMakerController.selectedOption.value,
-              onChanged: (value) {
-                adMakerController.selectedOption.value = value!;
-              },
-            )),
-      ],
     );
   }
 }

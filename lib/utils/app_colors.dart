@@ -6,7 +6,7 @@ class AppColors {
   static const Color verdeButtons = Color(0xFF2E8B57);
   static const Color marron = Color(0xFF8B4513);
   static const Color blanco = Colors.white;
-  static const Color azulClaro = Color(0xFFADD8E6);
+  static const Color azulClaro = Color.fromARGB(255, 49, 129, 235);
   static const Color gris = Color.fromARGB(255, 155, 156, 154);
   static const Color grisClaro = Color.fromARGB(255, 213, 214, 213);
   static const Color verdeClaro = Color.fromARGB(255, 79, 201, 48);

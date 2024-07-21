@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'package:agro/routes/app_routes.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:get/get.dart';
@@ -8,15 +7,22 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:agro/widgets/snackbars.dart';
 import 'package:agro/models/posts_model.dart';
 
-class AdMakerController extends GetxController {
+class AdProductController extends GetxController {
   var imageUrl = ''.obs;
   RxString selectedImage = RxString('');
+  var selectedOption = 'publicacion_normal'.obs;
+  RxBool companyExists = true.obs;
   var isLoading = false.obs;
 
   @override
   void onInit() {
     super.onInit();
     _loadUserData();
+    _checkCompanyExistence();
+  }
+
+  void selectOption(String opcion) {
+    selectedOption.value = opcion;
   }
 
   Future<void> _loadUserData() async {
@@ -25,6 +31,18 @@ class AdMakerController extends GetxController {
     if (storedText != null) {
       imageUrl.value = storedText;
     }
+  }
+
+  Future<void> _checkCompanyExistence() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? userId = prefs.getString('uid');
+
+    DocumentSnapshot doc = await FirebaseFirestore.instance
+        .collection('empresas')
+        .doc(userId)
+        .get();
+
+    companyExists.value = doc.exists; // Actualizar el RxBool
   }
 
   Future<void> setText(String value) async {
@@ -63,7 +81,7 @@ class AdMakerController extends GetxController {
   }
 
   Future<void> sendDataPublication(String content) async {
-    isLoading.value = true;
+    SnackbarUtils.warning("Enviando datos...");
     DateTime now = DateTime.now();
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     String? userId = prefs.getString('uid');
@@ -74,8 +92,6 @@ class AdMakerController extends GetxController {
     int year = now.year;
 
     if (selectedImage.isEmpty && content.isEmpty) {
-      isLoading.value = false;
-
       SnackbarUtils.info('¡No se han detectado datos!');
     } else if (selectedImage.isEmpty) {
       Posts posts = Posts(
@@ -84,8 +100,8 @@ class AdMakerController extends GetxController {
           photoProfile: userPhoto.toString(),
           content: content,
           imgUrl: '',
-          category: 'publicacion_normal',
-          createdAt: '$day/$month/$year');
+          category: selectedOption.toString(),
+          createdAt: '$day / $month / $year');
 
       Map<String, dynamic> dataPublic = posts.toMap();
 
@@ -94,10 +110,8 @@ class AdMakerController extends GetxController {
           .add(dataPublic)
           .then((value) {
         SnackbarUtils.success('¡Datos enviados correctaente!');
-        Get.offAllNamed(AppRoutes.home);
       }).catchError((error) {
         SnackbarUtils.error('¡Ocurrio un Error al enviar los datos!');
-        isLoading.value = false;
       });
     } else {
       String urlImgPost = await sendImage();
@@ -108,7 +122,7 @@ class AdMakerController extends GetxController {
           photoProfile: userPhoto.toString(),
           content: content,
           imgUrl: urlImgPost,
-          category: 'publicacion_normal',
+          category: selectedOption.toString(),
           createdAt: '$day-$month-$year');
 
       Map<String, dynamic> dataPublic = posts.toMap();
@@ -118,10 +132,8 @@ class AdMakerController extends GetxController {
           .add(dataPublic)
           .then((value) {
         SnackbarUtils.success('¡Datos enviados correctaente!');
-        Get.offAllNamed(AppRoutes.home);
       }).catchError((error) {
         SnackbarUtils.error('¡Ocurrio un Error al enviar los datos!');
-        isLoading.value = false;
       });
     }
   }

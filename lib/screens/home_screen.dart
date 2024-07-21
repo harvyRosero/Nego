@@ -1,97 +1,129 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:get/get.dart';
-import 'package:agro/widgets/home_screen_widgets.dart';
 import 'package:agro/controllers/home_controller.dart';
-import 'package:flutter/scheduler.dart';
-import 'package:agro/widgets/snackbars.dart';
+import 'package:agro/utils/app_colors.dart';
+import 'package:agro/widgets/publics_screen_widget.dart';
+import 'package:agro/widgets/search_screen_widget.dart';
+import 'package:agro/widgets/notifications_screen_widget.dart';
+import 'package:agro/routes/app_routes.dart';
 
-class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+class HomeScreen extends StatelessWidget {
+  HomeScreen({super.key});
 
-  @override
-  _HomeScreenState createState() => _HomeScreenState();
-}
-
-class _HomeScreenState extends State<HomeScreen> {
-  final ScrollController _scrollController = ScrollController();
-  final ValueNotifier<bool> _isBottomNavBarVisible = ValueNotifier(true);
-  final ValueNotifier<bool> _isFabVisible = ValueNotifier(true);
   final HomeController _homeController = Get.put(HomeController());
-
-  @override
-  void initState() {
-    super.initState();
-    _scrollController.addListener(_scrollListener);
-    _refreshData();
-  }
-
-  void _refreshData() {
-    setState(() {
-      _homeController.getDataPublic();
-    });
-  }
-
-  void _scrollListener() {
-    if (_scrollController.position.userScrollDirection ==
-        ScrollDirection.reverse) {
-      if (_isBottomNavBarVisible.value) _isBottomNavBarVisible.value = false;
-      if (_isFabVisible.value) _isFabVisible.value = false;
-    } else if (_scrollController.position.userScrollDirection ==
-        ScrollDirection.forward) {
-      if (!_isBottomNavBarVisible.value) _isBottomNavBarVisible.value = true;
-      if (!_isFabVisible.value) _isFabVisible.value = true;
-    }
-  }
-
-  @override
-  void dispose() {
-    _scrollController.removeListener(_scrollListener);
-    _scrollController.dispose();
-    _isBottomNavBarVisible.dispose();
-    _isFabVisible.dispose();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: FutureBuilder<List<Map<String, dynamic>>>(
-        future: _homeController.getDataPublic(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return CustomScrollView(
-              controller: _scrollController,
-              slivers: [
-                buildSliverAppBar(_refreshData),
-              ],
-            );
-          } else if (snapshot.hasError) {
-            SchedulerBinding.instance.addPostFrameCallback((_) {
-              SnackbarUtils.warning('No se encontraron datos...');
-            });
-            return const Center(child: Text('Cargando...'));
-          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return CustomScrollView(
-              controller: _scrollController,
-              slivers: [
-                buildSliverAppBar(_refreshData),
-              ],
-            );
-          } else {
-            return CustomScrollView(
-              controller: _scrollController,
-              slivers: [
-                buildSliverAppBar(_refreshData),
-                buildSliverList(snapshot.data!),
-              ],
-            );
-          }
-        },
-      ),
-      bottomNavigationBar:
-          buildAnimatedBottomNavigationBar(_isBottomNavBarVisible),
-      floatingActionButton: buildAnimatedFloatingActionButton(_isFabVisible),
+      body: Obx(() {
+        return _buildBodyContent();
+      }),
+      bottomNavigationBar: Obx(() {
+        return _buildBottomNavigationBar();
+      }),
+      floatingActionButton: Obx(() {
+        return _buildFloatingActionButton();
+      }),
     );
+  }
+
+  Widget _buildBodyContent() {
+    switch (_homeController.currentScreen.value) {
+      case 'Home':
+        return PublicsScreenWidget(
+          onScroll: _handleScroll,
+        );
+      case 'Search':
+        return SearchScreenWidget(
+            // onScroll: _handleScroll,
+            );
+      case 'Notifications':
+        return NotificationsScreenWidget(
+            // onScroll: _handleScroll,
+            );
+      default:
+        return const Center(child: Text('Unknown Screen'));
+    }
+  }
+
+  void _handleScroll(ScrollNotification scrollInfo) {
+    if (scrollInfo.metrics.axis == Axis.vertical) {
+      if (scrollInfo is UserScrollNotification) {
+        if (scrollInfo.direction == ScrollDirection.forward) {
+          _homeController.toggleBottomNav(true);
+        } else if (scrollInfo.direction == ScrollDirection.reverse) {
+          _homeController.toggleBottomNav(false);
+        }
+      }
+    }
+  }
+
+  Widget _buildFloatingActionButton() {
+    return _homeController.isBottomNavVisible.value
+        ? FloatingActionButton(
+            onPressed: () {
+              Get.toNamed(AppRoutes.adMaker);
+            },
+            backgroundColor: AppColors.verdeNavbar2,
+            shape: const CircleBorder(),
+            child: const Icon(
+              Icons.add,
+              color: AppColors.verdeNavbar,
+            ),
+          )
+        : const SizedBox.shrink();
+  }
+
+  Widget _buildBottomNavigationBar() {
+    return _homeController.isBottomNavVisible.value
+        ? BottomNavigationBar(
+            currentIndex: _getCurrentTabIndex(),
+            selectedItemColor: AppColors.verdeNavbar,
+            unselectedItemColor: AppColors.gris,
+            onTap: _onBottomNavTap,
+            items: const [
+              BottomNavigationBarItem(
+                icon: Icon(Icons.home),
+                label: 'Inicio',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.search),
+                label: 'Buscar',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.notifications),
+                label: 'Notificaciones',
+              ),
+            ],
+          )
+        : const SizedBox.shrink();
+  }
+
+  int _getCurrentTabIndex() {
+    switch (_homeController.currentScreen.value) {
+      case 'Home':
+        return 0;
+      case 'Search':
+        return 1;
+      case 'Notifications':
+        return 2;
+      default:
+        return 0;
+    }
+  }
+
+  void _onBottomNavTap(int index) {
+    switch (index) {
+      case 0:
+        _homeController.changeScreen('Home');
+        break;
+      case 1:
+        _homeController.changeScreen('Search');
+        break;
+      case 2:
+        _homeController.changeScreen('Notifications');
+        break;
+    }
   }
 }
