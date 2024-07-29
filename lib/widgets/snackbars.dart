@@ -9,6 +9,7 @@ class SnackbarUtils {
       message,
       backgroundColor: AppColors.verdeNavbar,
       colorText: Colors.white,
+      duration: const Duration(seconds: 7),
     );
   }
 

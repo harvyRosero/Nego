@@ -1,11 +1,15 @@
-// lib/widgets/item_widgets.dart
-
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:agro/utils/app_colors.dart';
+import 'package:timeago/timeago.dart' as timeago;
 
 Widget buildEmpresaItem(Map<String, dynamic> empresa) {
+  final createdAt = empresa['createdAt'] != null
+      ? DateTime.parse(empresa['createdAt'])
+      : DateTime.now();
+  final timeAgo = timeago.format(createdAt);
+
   return Padding(
     padding: const EdgeInsets.only(top: 5, left: 10, right: 10),
     child: Column(
@@ -27,11 +31,15 @@ Widget buildEmpresaItem(Map<String, dynamic> empresa) {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    empresa['name'] ?? 'Nombre de la empresa',
+                    empresa['companyName'] ?? 'Nombre de la empresa',
                     textAlign: TextAlign.left,
                     style: GoogleFonts.roboto(fontWeight: FontWeight.bold),
                   ),
                   Text(empresa['description'] ?? 'Descripción'),
+                  Text(
+                    timeAgo,
+                    style: const TextStyle(color: AppColors.grisLetras),
+                  ),
                   if (empresa['imgUrl'] != null && empresa['imgUrl'].isNotEmpty)
                     Column(
                       children: [
@@ -48,7 +56,7 @@ Widget buildEmpresaItem(Map<String, dynamic> empresa) {
                                 imageUrl: empresa['imgUrl'],
                                 fit: BoxFit.cover,
                                 placeholder: (context, url) => const Center(
-                                    child: CircularProgressIndicator()),
+                                    child: LinearProgressIndicator()),
                                 errorWidget: (context, url, error) =>
                                     const Icon(Icons.error),
                               ),
@@ -69,6 +77,11 @@ Widget buildEmpresaItem(Map<String, dynamic> empresa) {
 }
 
 Widget buildPublicacionItem(Map<String, dynamic> publicacion) {
+  final createdAt = publicacion['createdAt'] != null
+      ? DateTime.parse(publicacion['createdAt'])
+      : DateTime.now();
+  final timeAgo = timeago.format(createdAt);
+
   return Padding(
     padding: const EdgeInsets.only(top: 5, left: 10, right: 10),
     child: Column(
@@ -88,10 +101,20 @@ Widget buildPublicacionItem(Map<String, dynamic> publicacion) {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    publicacion['userName'] ?? 'Nombre de usuario',
-                    textAlign: TextAlign.left,
-                    style: GoogleFonts.roboto(fontWeight: FontWeight.bold),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        publicacion['userName'] ?? 'Nombre de usuario',
+                        textAlign: TextAlign.left,
+                        style: GoogleFonts.roboto(fontWeight: FontWeight.bold),
+                      ),
+                      Text(
+                        timeAgo,
+                        style: const TextStyle(
+                            color: AppColors.grisLetras, fontSize: 10),
+                      ),
+                    ],
                   ),
                   Text(publicacion['content'] ?? 'Contenido'),
                   if (publicacion['imgUrl'] != null &&
@@ -111,7 +134,9 @@ Widget buildPublicacionItem(Map<String, dynamic> publicacion) {
                                 imageUrl: publicacion['imgUrl'],
                                 fit: BoxFit.cover,
                                 placeholder: (context, url) => const Center(
-                                    child: CircularProgressIndicator()),
+                                    child: LinearProgressIndicator(
+                                  color: AppColors.verdeNavbar,
+                                )),
                                 errorWidget: (context, url, error) =>
                                     const Icon(Icons.error),
                               ),

@@ -12,15 +12,15 @@ class SearchScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Change Screen with GetX'),
+        title: const Text('Change Screen with GetX'),
       ),
       body: Obx(() {
         if (searchController.currentScreen.value == 'home') {
-          return HomeScreen();
+          return const HomeScreen();
         } else if (searchController.currentScreen.value == 'product') {
-          return ProductScreen();
+          return const ProductScreen();
         } else {
-          return Center(child: Text('Unknown Screen'));
+          return const Center(child: Text('Unknown Screen'));
         }
       }),
       bottomNavigationBar: BottomNavigationBar(
@@ -32,7 +32,7 @@ class SearchScreen extends StatelessWidget {
             searchController.changeScreen('product');
           }
         },
-        items: [
+        items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.home),
             label: 'Home',
