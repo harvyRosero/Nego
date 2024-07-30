@@ -2,7 +2,7 @@ import 'package:agro/utils/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:agro/controllers/config_address_controller.dart';
+import 'package:agro/controllers/profile/config_address_controller.dart';
 
 class MapScreen extends StatefulWidget {
   final LatLng location;
@@ -59,6 +59,7 @@ class _MapScreenState extends State<MapScreen> {
             Get.back(result: _currentLocation);
           },
         ),
+        backgroundColor: AppColors.blanco,
       ),
       body: Stack(
         children: [

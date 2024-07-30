@@ -40,6 +40,7 @@ class CreateAccountScreen extends StatelessWidget {
                 _buildCreateAccountButton(),
                 const SizedBox(height: 15),
                 _buildLoginPrompt(),
+                _buildGoogleRegisterButton()
               ],
             ),
           ),
@@ -198,6 +199,24 @@ class CreateAccountScreen extends StatelessWidget {
         ),
       ],
     );
+  }
+
+  Widget _buildGoogleRegisterButton() {
+    return Center(
+        child: ElevatedButton.icon(
+      onPressed: () async {
+        createAccountController.registerWithGmail();
+      },
+      icon: Image.asset(
+        'assets/gmail_logo.png',
+        height: 24,
+        width: 24,
+      ),
+      label: const Text(
+        'Crear cuenta con Google',
+        style: TextStyle(color: AppColors.grisLetras),
+      ),
+    ));
   }
 
   Widget _buildLogo() {

@@ -72,15 +72,24 @@ class LoginController extends GetxController {
         isLoadingButton.value = false;
         return;
       }
-      fetchUserData(userCredential.user!.uid);
 
-      SnackbarUtils.success('Inicio de sesión exitoso.');
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      prefs.setString('userId', userCredential.user!.uid);
       Get.offAllNamed(AppRoutes.home);
 
       gmailController.clear();
       passwordController.clear();
+    } on FirebaseAuthException catch (e) {
+      if (e.code == 'user-not-found' || e.code == 'wrong-password') {
+        SnackbarUtils.error(
+            'Credenciales inválidas. Por favor, intenta de nuevo.');
+      } else {
+        SnackbarUtils.error(
+          '¡Error al iniciar sesión!, revisa tus credenciales',
+        );
+      }
     } catch (e) {
-      SnackbarUtils.error('¡Error al iniciar sesión!');
+      SnackbarUtils.error('¡Error al iniciar sesión! $e.');
     } finally {
       isLoadingButton.value = false;
     }
@@ -102,24 +111,19 @@ class LoginController extends GetxController {
       UserCredential userCredential =
           await _auth.signInWithCredential(credential);
 
-      await _firestore.collection('users').doc(userCredential.user!.uid).set({
-        'userName': userCredential.user!.displayName.toString(),
-        'email': userCredential.user!.email.toString(),
-        'ubicacion': '',
-        'perfilImg': userCredential.user!.photoURL.toString(),
-        'celular': '',
-        'ciudad': '',
-        'barrio': '',
-        'detallesUbicacion': '',
-        'maps': ''
-      });
-
-      fetchUserData(userCredential.user!.uid);
+      final bool userExists = await checkIfUserExists(userCredential.user!.uid);
+      if (!userExists) {
+        SnackbarUtils.info('La cuenta no existe, por favor regístrate.');
+        await googleSignIn.signOut();
+        return;
+      }
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      prefs.setString('userId', userCredential.user!.uid);
 
       Get.offAllNamed(AppRoutes.home);
     } catch (e) {
       SnackbarUtils.error(
-          '¡Ocurrio un error inesperado!, revisa tu conexion y vuelve a intentarlo');
+          '¡Ocurrió un error inesperado!, revisa tu conexión y vuelve a intentarlo');
     }
   }
 
@@ -149,34 +153,9 @@ class LoginController extends GetxController {
     return prefs.getString('gmail') != null;
   }
 
-  Future<void> fetchUserData(userId) async {
-    try {
-      DocumentSnapshot userDoc =
-          await _firestore.collection('users').doc(userId).get();
-      if (userDoc.exists) {
-        userData.value = userDoc.data() as Map<String, dynamic>;
-        String userName = userData['userName'];
-        String gmail = userData['email'];
-        String perfilImg = userData['perfilImg'];
-        String ubicacion = userData['ubicacion'];
-        String ciudad = userData['ciudad'];
-        String barrio = userData['barrio'];
-        String detallesUbicacion = userData['detallesUbicacion'];
-        String celular = userData['celular'];
-
-        final SharedPreferences prefs = await SharedPreferences.getInstance();
-        prefs.setString('userId', userId);
-        prefs.setString('userName', userName);
-        prefs.setString('gmail', gmail);
-        prefs.setString('perfilImg', perfilImg);
-        prefs.setString('ubicacion', ubicacion);
-        prefs.setString('ciudad', ciudad);
-        prefs.setString('barrio', barrio);
-        prefs.setString('detallesUbicacion', detallesUbicacion);
-        prefs.setString('celular', celular);
-      }
-    } catch (e) {
-      Get.snackbar('Error (lsc)', 'No se pudo obtener datos de usuario.');
-    }
+  Future<bool> checkIfUserExists(String uid) async {
+    final DocumentSnapshot userDoc =
+        await FirebaseFirestore.instance.collection('users').doc(uid).get();
+    return userDoc.exists;
   }
 }

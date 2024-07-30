@@ -1,7 +1,7 @@
 import 'package:agro/routes/app_routes.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:agro/controllers/profile_screen_controller.dart';
+import 'package:agro/controllers/profile/profile_screen_controller.dart';
 import 'package:agro/utils/app_colors.dart';
 
 class ProfileScreenWidget extends StatelessWidget {
@@ -22,7 +22,7 @@ class ProfileScreenWidget extends StatelessWidget {
         child: ListView(
           padding: const EdgeInsets.symmetric(vertical: 20.0, horizontal: 30.0),
           children: [
-            const SizedBox(height: 20),
+            const SizedBox(height: 50),
             _buildProfileImage(),
             const SizedBox(height: 10),
             _buildUserName(),
@@ -31,7 +31,81 @@ class ProfileScreenWidget extends StatelessWidget {
             const SizedBox(height: 20),
             _buildAddressInfo(),
             const SizedBox(height: 20),
-            _buildLogoutButton(),
+            Obx(() => controller.lat.value.isEmpty
+                ? Container()
+                : _buildButton(
+                    icon: Icons.location_on,
+                    label: "Ver mi ubicación",
+                    onTap: () {
+                      Get.toNamed(
+                        AppRoutes.map2,
+                        arguments: {
+                          'lat': controller.lat.value,
+                          'lng': controller.lng.value,
+                        },
+                      );
+                    },
+                  )),
+            const SizedBox(height: 10),
+            Obx(() => controller.direccion.value.isEmpty
+                ? Container()
+                : _buildButton(
+                    icon: Icons.location_city,
+                    label: "Editar ubicación",
+                    onTap: () {
+                      Get.toNamed(
+                        AppRoutes.configAddress,
+                        arguments: {
+                          'barrio': controller.barrio.value,
+                          'direccion': controller.direccion.value,
+                          'detallesDireccion': controller.detallesUbicacion,
+                          'celular': controller.celular.value,
+                        },
+                      );
+                    },
+                  )),
+            const SizedBox(height: 10),
+            const Divider(),
+            const SizedBox(height: 10),
+            _buildButton(
+              icon: Icons.settings_accessibility,
+              label: "Configurar cuenta",
+              onTap: () {
+                Get.toNamed(AppRoutes.configAccount);
+              },
+            ),
+            const SizedBox(height: 20),
+            _buildButton(
+              icon: Icons.list,
+              label: "Historial de pedidos",
+              onTap: () {},
+            ),
+            const SizedBox(height: 20),
+            _buildButton(
+              icon: Icons.notifications_active,
+              label: "Notificaciones",
+              onTap: () {},
+            ),
+            const SizedBox(height: 10),
+            const Divider(),
+            const SizedBox(height: 10),
+            _buildButton(
+              icon: Icons.support_agent,
+              label: "Soporte",
+              onTap: () {},
+            ),
+            const SizedBox(height: 20),
+            _buildButton(
+              icon: Icons.security_rounded,
+              label: "Políticas de seguridad",
+              onTap: () {},
+            ),
+            const SizedBox(height: 20),
+            _buildButton(
+              icon: Icons.exit_to_app,
+              label: "Cerrar sesión",
+              onTap: controller.logout,
+            ),
           ],
         ),
       ),
@@ -67,8 +141,9 @@ class ProfileScreenWidget extends StatelessWidget {
         return Text(
           controller.userName.value,
           style: const TextStyle(
-            fontSize: 24,
+            fontSize: 22,
             fontWeight: FontWeight.bold,
+            color: AppColors.verdeNavbar,
           ),
         );
       }),
@@ -81,8 +156,8 @@ class ProfileScreenWidget extends StatelessWidget {
         return Text(
           controller.gmail.value,
           style: const TextStyle(
-            fontSize: 16,
-            color: Colors.grey,
+            fontSize: 14,
+            color: AppColors.verdeLetras,
           ),
         );
       }),
@@ -92,7 +167,15 @@ class ProfileScreenWidget extends StatelessWidget {
   Widget _buildAddressInfo() {
     return GestureDetector(
       onTap: () {
-        Get.toNamed(AppRoutes.configAddress);
+        Get.toNamed(
+          AppRoutes.configAddress,
+          arguments: {
+            'barrio': controller.barrio.value,
+            'direccion': controller.direccion.value,
+            'detallesDireccion': controller.detallesUbicacion,
+            'celular': controller.celular.value,
+          },
+        );
       },
       child: Container(
         height: 110,
@@ -138,7 +221,7 @@ class ProfileScreenWidget extends StatelessWidget {
           child: Text(
             'Dirección',
             style: TextStyle(
-              fontSize: 13,
+              fontSize: 14,
               fontWeight: FontWeight.bold,
             ),
           ),
@@ -153,46 +236,74 @@ class ProfileScreenWidget extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          controller.ubicacion.value.isNotEmpty
-              ? controller.ubicacion.value
+          controller.direccion.value.isNotEmpty
+              ? controller.direccion.value
               : 'Aún no tiene ninguna dirección agregada.',
           style: const TextStyle(
             fontSize: 12,
             color: AppColors.grisLetras,
           ),
+          maxLines: 1,
           textAlign: TextAlign.start,
         ),
-        if (controller.ubicacion.value.isNotEmpty) ...[
-          const Row(
+        if (controller.direccion.value.isNotEmpty) ...[
+          Row(
             children: [
               Text(
-                'barrio',
-                style: TextStyle(
+                controller.barrio.value,
+                style: const TextStyle(
                   fontSize: 12,
                   color: AppColors.grisLetras,
                 ),
+                maxLines: 1,
                 textAlign: TextAlign.start,
               ),
-              SizedBox(width: 10),
+              const Text(" - "),
               Text(
-                'ciudad',
-                style: TextStyle(
+                controller.ciudad.value,
+                style: const TextStyle(
                   fontSize: 12,
                   color: AppColors.grisLetras,
                 ),
+                maxLines: 1,
                 textAlign: TextAlign.start,
               ),
             ],
           ),
         ],
+        if (controller.celular.value.isNotEmpty)
+          Text(
+            controller.celular.value,
+            style: const TextStyle(
+              fontSize: 11,
+              color: AppColors.grisLetras,
+            ),
+          )
       ],
     );
   }
 
-  Widget _buildLogoutButton() {
-    return ElevatedButton(
-      onPressed: controller.logout,
-      child: const Text('Cerrar sesión'),
+  Widget _buildButton(
+      {required IconData icon,
+      required String label,
+      required VoidCallback onTap}) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Row(
+        children: [
+          const SizedBox(width: 10),
+          Icon(icon, color: AppColors.verdeNavbar),
+          const SizedBox(width: 30),
+          Expanded(
+            child: Text(
+              label,
+              style: const TextStyle(fontSize: 16, color: AppColors.grisLetras),
+            ),
+          ),
+          const Icon(Icons.arrow_right_outlined, color: AppColors.verdeNavbar),
+          const SizedBox(width: 10),
+        ],
+      ),
     );
   }
 }
