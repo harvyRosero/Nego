@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:agro/controllers/profile/profile_screen_controller.dart';
 import 'package:agro/utils/app_colors.dart';
+import 'package:agro/widgets/snackbars.dart';
 
 class ProfileScreenWidget extends StatelessWidget {
   final Function(ScrollNotification) onScroll;
@@ -71,20 +72,31 @@ class ProfileScreenWidget extends StatelessWidget {
               icon: Icons.settings_accessibility,
               label: "Configurar cuenta",
               onTap: () {
-                Get.toNamed(AppRoutes.configAccount);
+                Get.toNamed(
+                  AppRoutes.configAccount,
+                  arguments: {
+                    'userName': controller.userName.value,
+                    'gmail': controller.gmail.value,
+                    'celular': controller.celular.value,
+                  },
+                );
               },
             ),
             const SizedBox(height: 20),
             _buildButton(
               icon: Icons.list,
               label: "Historial de pedidos",
-              onTap: () {},
+              onTap: () {
+                SnackbarUtils.success('eidaf sdfasf asd f a');
+              },
             ),
             const SizedBox(height: 20),
             _buildButton(
               icon: Icons.notifications_active,
               label: "Notificaciones",
-              onTap: () {},
+              onTap: () {
+                SnackbarUtils.error('sdasdfasd fsd fsafd');
+              },
             ),
             const SizedBox(height: 10),
             const Divider(),
@@ -92,7 +104,9 @@ class ProfileScreenWidget extends StatelessWidget {
             _buildButton(
               icon: Icons.support_agent,
               label: "Soporte",
-              onTap: () {},
+              onTap: () {
+                SnackbarUtils.warning('sd ddd ddasdfasd fsd fsafd');
+              },
             ),
             const SizedBox(height: 20),
             _buildButton(
@@ -106,6 +120,7 @@ class ProfileScreenWidget extends StatelessWidget {
               label: "Cerrar sesión",
               onTap: controller.logout,
             ),
+            const SizedBox(height: 20),
           ],
         ),
       ),

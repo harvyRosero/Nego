@@ -265,6 +265,17 @@ class LoginScreen extends StatelessWidget {
                   'Iniciar Sesión con Google',
                   style: TextStyle(color: AppColors.grisLetras),
                 ),
+                style: ElevatedButton.styleFrom(
+                  foregroundColor: AppColors.grisLetras,
+                  backgroundColor: AppColors.blanco,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(
+                        8), // Cambiar el radio de borde si es necesario
+                  ),
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 12), // Cambiar el padding si es necesario
+                ),
               ),
             );
     });

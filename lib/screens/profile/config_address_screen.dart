@@ -13,10 +13,7 @@ class ConfigAddressScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Recupera los argumentos
     final arguments = Get.arguments as Map<String, dynamic>;
-
-    // Extrae los parámetros
     final barrio = arguments['barrio'];
     final direccion = arguments['direccion'];
     final detallesDireccion = arguments['detallesDireccion'];

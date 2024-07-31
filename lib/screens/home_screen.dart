@@ -22,9 +22,6 @@ class HomeScreen extends StatelessWidget {
       bottomNavigationBar: Obx(() {
         return _buildBottomNavigationBar();
       }),
-      // floatingActionButton: Obx(() {
-      //   return _buildFloatingActionButton();
-      // }),
     );
   }
 
@@ -66,6 +63,7 @@ class HomeScreen extends StatelessWidget {
   Widget _buildBottomNavigationBar() {
     return homeController.isBottomNavVisible.value
         ? BottomNavigationBar(
+            backgroundColor: Colors.blueGrey,
             currentIndex: _getCurrentTabIndex(),
             selectedItemColor: AppColors.verdeNavbar,
             unselectedItemColor: AppColors.gris,

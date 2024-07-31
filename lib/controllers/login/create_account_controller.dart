@@ -72,14 +72,64 @@ class CreateAccountController extends GetxController {
     if (validatePassword(passwordController.text) &&
         validateEmail(gmailController.text) &&
         userNameController.text.isNotEmpty) {
-      _showTermsAndConditionsDialog();
+      // Pasa la función _sendDataToFirebase como argumento
+      await _showTermsAndConditionsDialog(_sendDataToFirebase);
     } else {
       SnackbarUtils.info("¡Debes llenar todos los campos!");
       isLoadingButton.value = false;
     }
   }
 
-  Future<void> sendDataToFirebase() async {
+  void showTermsAndConditionsDialogFromGmailButton() {
+    _showTermsAndConditionsDialog(_registerWithGmail);
+  }
+
+  Future<void> _showTermsAndConditionsDialog(
+      Future<void> Function() onAccept) async {
+    await _fetchData();
+    return Get.dialog(
+      AlertDialog(
+        title: const Text(
+          'Términos y Condiciones',
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        ),
+        content: SingleChildScrollView(
+          child: Obx(() {
+            return Text(
+              termsAndConditions.value.replaceAll('\n\n', ' '),
+              style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w300),
+            );
+          }),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Get.back();
+              isLoadingButton.value = false;
+            },
+            child: const Text('Cancelar'),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              Get.back();
+              // Llama a la función pasada como argumento
+              await onAccept();
+            },
+            style: ElevatedButton.styleFrom(
+              foregroundColor: AppColors.blanco,
+              backgroundColor: AppColors.azulClaro,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(3),
+              ),
+            ),
+            child: const Text('Aceptar'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _sendDataToFirebase() async {
     try {
       UserCredential userCredential =
           await _auth.createUserWithEmailAndPassword(
@@ -134,50 +184,7 @@ class CreateAccountController extends GetxController {
     }
   }
 
-  Future<void> _showTermsAndConditionsDialog() async {
-    await _fetchData();
-    return Get.dialog(
-      AlertDialog(
-        title: const Text(
-          'Términos y Condiciones',
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-        ),
-        content: SingleChildScrollView(
-          child: Obx(() {
-            return Text(
-              termsAndConditions.value.replaceAll('\n\n', ' '),
-              style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w300),
-            );
-          }),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Get.back();
-              isLoadingButton.value = false;
-            },
-            child: const Text('Cancelar'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Get.back();
-              sendDataToFirebase();
-            },
-            style: ElevatedButton.styleFrom(
-              foregroundColor: AppColors.blanco,
-              backgroundColor: AppColors.azulClaro,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(3),
-              ),
-            ),
-            child: const Text('Aceptar'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Future<void> registerWithGmail() async {
+  Future<void> _registerWithGmail() async {
     try {
       final GoogleSignInAccount? gUser = await googleSignIn.signIn();
       if (gUser == null) {

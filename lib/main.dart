@@ -29,9 +29,27 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         scaffoldBackgroundColor: AppColors.blanco,
+        appBarTheme: const AppBarTheme(
+          color: AppColors.blanco,
+          iconTheme: IconThemeData(color: AppColors.grisLetras),
+          titleTextStyle: TextStyle(
+              color: AppColors.grisLetras,
+              fontSize: 17,
+              fontWeight: FontWeight.bold),
+        ),
+        textSelectionTheme: TextSelectionThemeData(
+          cursorColor: AppColors.gris,
+          selectionColor: AppColors.grisLetras.withOpacity(0.5),
+          selectionHandleColor: AppColors.verdeLetras,
+        ),
+        elevatedButtonTheme: ElevatedButtonThemeData(
+          style: ElevatedButton.styleFrom(
+            foregroundColor: Colors.white,
+            backgroundColor: AppColors.verdeNavbar,
+          ),
+        ),
       ),
-      initialRoute:
-          isSignedIn ? AppRoutes.home : AppRoutes.preLogin, // Ruta inicial
+      initialRoute: isSignedIn ? AppRoutes.home : AppRoutes.preLogin,
       getPages: AppRoutes.routes,
     );
   }

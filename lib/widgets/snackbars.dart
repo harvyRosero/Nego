@@ -7,9 +7,20 @@ class SnackbarUtils {
     return Get.snackbar(
       "OK",
       message,
-      backgroundColor: AppColors.verdeNavbar,
-      colorText: Colors.white,
-      duration: const Duration(seconds: 7),
+      icon: const Icon(Icons.check_circle, color: AppColors.blanco),
+      backgroundColor: AppColors.verdeSuccess,
+      colorText: AppColors.blanco,
+      duration: const Duration(seconds: 8),
+      margin: const EdgeInsets.all(10),
+      borderRadius: 8,
+      boxShadows: [
+        BoxShadow(
+          color: Colors.black.withOpacity(0.2),
+          spreadRadius: 2,
+          blurRadius: 6,
+          offset: const Offset(0, 3),
+        ),
+      ],
     );
   }
 
@@ -17,8 +28,20 @@ class SnackbarUtils {
     return Get.snackbar(
       "Error",
       message,
-      backgroundColor: const Color.fromARGB(253, 250, 17, 0),
-      colorText: Colors.white,
+      icon: const Icon(Icons.error, color: AppColors.blanco),
+      backgroundColor: AppColors.rojoError,
+      colorText: AppColors.blanco,
+      duration: const Duration(seconds: 5),
+      margin: const EdgeInsets.all(10),
+      borderRadius: 8,
+      boxShadows: [
+        BoxShadow(
+          color: Colors.black.withOpacity(0.2),
+          spreadRadius: 2,
+          blurRadius: 6,
+          offset: const Offset(0, 3),
+        ),
+      ],
     );
   }
 
@@ -26,8 +49,20 @@ class SnackbarUtils {
     return Get.snackbar(
       "Advertencia",
       message,
-      backgroundColor: Colors.orange,
-      colorText: Colors.white,
+      icon: const Icon(Icons.warning, color: AppColors.blanco),
+      backgroundColor: AppColors.naranjaAdvertencia,
+      colorText: AppColors.blanco,
+      duration: const Duration(seconds: 5),
+      margin: const EdgeInsets.all(10),
+      borderRadius: 8,
+      boxShadows: [
+        BoxShadow(
+          color: Colors.black.withOpacity(0.2),
+          spreadRadius: 2,
+          blurRadius: 6,
+          offset: const Offset(0, 3),
+        ),
+      ],
     );
   }
 
@@ -35,8 +70,6 @@ class SnackbarUtils {
     return Get.snackbar(
       "Información",
       message,
-      backgroundColor: Colors.blue,
-      colorText: Colors.white,
     );
   }
 }

@@ -21,8 +21,6 @@ class ConfigAddressController extends GetxController {
       TextEditingController();
   final TextEditingController celularController = TextEditingController();
 
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-
   void setLocation(LatLng location) {
     currentLocation.value = location;
   }
@@ -39,8 +37,7 @@ class ConfigAddressController extends GetxController {
     var fetchedLocations = snapshot.docs.map((doc) {
       var data = doc.data();
       return {
-        'name': doc
-            .id, // Asumimos que el ID del documento es el nombre de la ciudad
+        'name': doc.id,
         'lat': double.parse(data['lat']),
         'lng': double.parse(data['lng']),
       };
@@ -66,62 +63,27 @@ class ConfigAddressController extends GetxController {
           '¡Campos vacios!', 'verifique que todos los campos esten llenos.');
       return;
     }
-
-    _sendUserData();
+    _updateUserData();
   }
 
-  Future<void> _sendUserData() async {
-    // Inicializa las SharedPreferences
+  Future<void> _updateUserData() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
 
+    final String? userId = prefs.getString('userId');
     try {
-      final String? userId = prefs.getString('userId');
-      final String? userName = prefs.getString('userName');
-      final String? gmail = prefs.getString('gmail');
-      final String? perfilImg = prefs.getString('perfilImg');
-
-      // Verifica si el ID del usuario está disponible
-      if (userId == null) {
-        throw Exception('User ID not found in SharedPreferences');
-      }
-
-      // Prepara los datos del usuario
-      final userData = {
-        'userName': userName ?? '',
-        'email': gmail ?? '',
-        'direccion': direccionController.text,
-        'perfilImg': perfilImg ?? '',
+      await FirebaseFirestore.instance.collection('users').doc(userId).update({
         'celular': celularController.text,
         'ciudad': selectedCity.value,
         'barrio': barrioController.text,
         'detallesUbicacion': detallesDireccionController.text,
         'lat': selectedLatMarker.value,
         'lng': selectedLngMarker.value,
-      };
-
-      // Envía los datos al Firestore
-      await _firestore.collection('users').doc(userId).set(userData);
-
-      // Actualiza SharedPreferences sólo si la operación en Firestore fue exitosa
-      await prefs.setString('userId', userId);
-      await prefs.setString('userName', userName ?? '');
-      await prefs.setString('gmail', gmail ?? '');
-      await prefs.setString('perfilImg', perfilImg ?? '');
-      await prefs.setString('direccion', direccionController.text);
-      await prefs.setString('ciudad', selectedCity.value);
-      await prefs.setString('barrio', barrioController.text);
-      await prefs.setString(
-          'detallesUbicacion', detallesDireccionController.text);
-      await prefs.setString('celular', celularController.text);
-      await prefs.setString('lat', selectedLatMarker.value);
-      await prefs.setString('lng', selectedLngMarker.value);
-
-      // Redirige al usuario y muestra un mensaje de éxito
+        'direccion': direccionController.text
+      });
       Get.offAllNamed(AppRoutes.home);
       SnackbarUtils.success('Tus datos fueron enviados');
     } catch (e) {
-      // Muestra un mensaje de error
-      SnackbarUtils.error('Error al enviar los datos del usuario: $e');
+      SnackbarUtils.error("No se enviar datos");
     }
   }
 }
