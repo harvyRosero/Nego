@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:agro/controllers/profile/profile_screen_controller.dart';
 import 'package:agro/utils/app_colors.dart';
-import 'package:agro/widgets/snackbars.dart';
 
 class ProfileScreenWidget extends StatelessWidget {
   final Function(ScrollNotification) onScroll;
@@ -87,7 +86,7 @@ class ProfileScreenWidget extends StatelessWidget {
               icon: Icons.list,
               label: "Historial de pedidos",
               onTap: () {
-                SnackbarUtils.success('eidaf sdfasf asd f a');
+                Get.toNamed(AppRoutes.allOrders);
               },
             ),
             const SizedBox(height: 20),
@@ -95,7 +94,7 @@ class ProfileScreenWidget extends StatelessWidget {
               icon: Icons.notifications_active,
               label: "Notificaciones",
               onTap: () {
-                SnackbarUtils.error('sdasdfasd fsd fsafd');
+                Get.toNamed(AppRoutes.configNotifications);
               },
             ),
             const SizedBox(height: 10),
@@ -105,14 +104,16 @@ class ProfileScreenWidget extends StatelessWidget {
               icon: Icons.support_agent,
               label: "Soporte",
               onTap: () {
-                SnackbarUtils.warning('sd ddd ddasdfasd fsd fsafd');
+                Get.toNamed(AppRoutes.support);
               },
             ),
             const SizedBox(height: 20),
             _buildButton(
               icon: Icons.security_rounded,
               label: "Políticas de seguridad",
-              onTap: () {},
+              onTap: () {
+                Get.toNamed(AppRoutes.termsAndPolitics);
+              },
             ),
             const SizedBox(height: 20),
             _buildButton(
@@ -155,6 +156,7 @@ class ProfileScreenWidget extends StatelessWidget {
       child: Obx(() {
         return Text(
           controller.userName.value,
+          textAlign: TextAlign.center,
           style: const TextStyle(
             fontSize: 22,
             fontWeight: FontWeight.bold,

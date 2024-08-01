@@ -172,10 +172,10 @@ class CreateAccountController extends GetxController {
     try {
       DocumentSnapshot document = await FirebaseFirestore.instance
           .collection('DataApp')
-          .doc('tyc')
+          .doc('politicasDePrivacidad')
           .get();
       if (document.exists) {
-        termsAndConditions.value = document['version1'];
+        termsAndConditions.value = document['tyc'];
       } else {
         termsAndConditions.value = 'No se encontraron términos y condiciones.';
       }

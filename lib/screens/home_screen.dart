@@ -6,7 +6,7 @@ import 'package:agro/utils/app_colors.dart';
 import 'package:agro/widgets/profile/profile_screen_widget.dart';
 import 'package:agro/widgets/search_screen_widget.dart';
 import 'package:agro/widgets/notifications_screen_widget.dart';
-import 'package:agro/widgets/home/home_screen_widget.dart';
+import 'package:agro/widgets/home/home_product_list_widget.dart';
 
 class HomeScreen extends StatelessWidget {
   HomeScreen({super.key});

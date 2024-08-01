@@ -11,6 +11,7 @@ class AppColors {
   static const Color gris = Color.fromARGB(255, 155, 156, 154);
   static const Color grisVerdoso = Color.fromARGB(255, 234, 245, 237);
   static const Color grisClaro = Color.fromARGB(222, 235, 237, 238);
+  static const Color grisClaro2 = Color.fromARGB(230, 255, 255, 255);
   static const Color verdeClaro = Color.fromARGB(255, 197, 247, 185);
   static const Color verdeLetras = Color.fromARGB(255, 42, 136, 30);
   static const Color grisLetras = Color.fromARGB(255, 92, 95, 92);
