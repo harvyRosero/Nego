@@ -1,5 +1,6 @@
 import 'package:agro/utils/app_colors.dart';
 import 'package:flutter/material.dart';
+import 'package:agro/widgets/home/cart_item_widget.dart';
 
 Widget buildSliverAppBar() {
   return SliverAppBar(
@@ -20,7 +21,7 @@ Widget _buildAppBarContent() {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         _buildLogoContainer(),
-        _buildShoppingCartButton(),
+        const CartItemWidget(),
       ],
     ),
   );
@@ -76,16 +77,45 @@ Widget _buildLogoContainer() {
   );
 }
 
-Widget _buildShoppingCartButton() {
-  return IconButton(
-    icon: const Icon(
-      Icons.shopping_cart,
-      size: 30,
-      color: AppColors.blanco,
-    ),
-    onPressed: () {},
-  );
-}
+// Widget _buildShoppingCartButton() {
+//   return Stack(
+//     children: <Widget>[
+//       IconButton(
+//         icon: const Icon(
+//           Icons.shopping_cart,
+//           size: 30,
+//           color: AppColors.blanco,
+//         ),
+//         onPressed: () {
+//           Get.toNamed(AppRoutes.shoppingCart);
+//         },
+//       ),
+//       Positioned(
+//         top: 0,
+//         left: 0,
+//         child: Container(
+//             padding: const EdgeInsets.all(4),
+//             decoration: BoxDecoration(
+//               color: Colors.red,
+//               borderRadius: BorderRadius.circular(10),
+//             ),
+//             constraints: const BoxConstraints(
+//               minWidth: 10,
+//               minHeight: 10,
+//             ),
+//             child: Text(
+//               '6',
+//               style: const TextStyle(
+//                 color: Colors.white,
+//                 fontSize: 5,
+//                 fontWeight: FontWeight.bold,
+//               ),
+//               textAlign: TextAlign.center,
+//             )),
+//       ),
+//     ],
+//   );
+// }
 
 BoxDecoration _buildBackgroundDecoration() {
   return const BoxDecoration(

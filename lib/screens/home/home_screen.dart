@@ -28,7 +28,7 @@ class HomeScreen extends StatelessWidget {
   Widget _buildBodyContent() {
     switch (homeController.currentScreen.value) {
       case 'Home':
-        return HomeScreenWidget(
+        return HomeProductListWidget(
           onScroll: _handleScroll,
         );
       case 'Search':

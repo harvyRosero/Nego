@@ -1,17 +1,24 @@
+import 'dart:convert';
+
+import 'package:agro/models/selected_product_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:agro/controllers/home/cart_item_controller.dart';
 
 class HomeController extends GetxController {
   var currentScreen = 'Home'.obs;
   var isBottomNavVisible = true.obs;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   var userData = {}.obs;
+  RxList<SelectedProductData> cartProducts = <SelectedProductData>[].obs;
+  final CartItemController cartItemController = Get.put(CartItemController());
 
   @override
   void onInit() {
     super.onInit();
     _fetchUserData();
+    _loadCartProducts();
   }
 
   void toggleBottomNav(bool isVisible) {
@@ -56,6 +63,17 @@ class HomeController extends GetxController {
       }
     } catch (e) {
       Get.snackbar('Error (lsc)', 'No se pudo obtener datos de usuario.');
+    }
+  }
+
+  Future<void> _loadCartProducts() async {
+    final prefs = await SharedPreferences.getInstance();
+    String? productListStr = prefs.getString('productos');
+    if (productListStr != null) {
+      List<dynamic> productList = json.decode(productListStr);
+      cartProducts.value =
+          productList.map((item) => SelectedProductData.fromMap(item)).toList();
+      cartItemController.itemCount.value = productList.length;
     }
   }
 }

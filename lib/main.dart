@@ -13,7 +13,6 @@ void main() async {
   );
   final LoginController controller = Get.put(LoginController());
   bool isSignedIn = await controller.checkUser();
-
   runApp(MyApp(isSignedIn: isSignedIn));
 }
 
