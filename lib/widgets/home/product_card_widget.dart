@@ -2,6 +2,7 @@ import 'package:agro/routes/app_routes.dart';
 import 'package:agro/utils/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class ProductCard extends StatelessWidget {
   final String productId;
@@ -60,29 +61,17 @@ class ProductCard extends StatelessWidget {
               ClipRRect(
                 borderRadius:
                     const BorderRadius.vertical(top: Radius.circular(10.0)),
-                child: Image.network(
-                  productImage,
+                child: CachedNetworkImage(
+                  imageUrl: productImage,
                   fit: BoxFit.cover,
                   height: 100,
                   width: double.infinity,
-                  loadingBuilder: (BuildContext context, Widget child,
-                      ImageChunkEvent? loadingProgress) {
-                    if (loadingProgress == null) {
-                      return child;
-                    } else {
-                      return Center(
-                        child: CircularProgressIndicator(
-                          value: loadingProgress.expectedTotalBytes != null
-                              ? loadingProgress.cumulativeBytesLoaded /
-                                  loadingProgress.expectedTotalBytes!
-                              : null,
-                        ),
-                      );
-                    }
-                  },
-                  errorBuilder: (context, error, stackTrace) {
-                    return const Center(child: Icon(Icons.error));
-                  },
+                  placeholder: (context, url) => const Center(
+                      child: CircularProgressIndicator(
+                    color: AppColors.verdeNavbar,
+                  )),
+                  errorWidget: (context, url, error) =>
+                      const Center(child: Icon(Icons.error)),
                 ),
               ),
               Expanded(

@@ -7,6 +7,7 @@ import 'package:agro/controllers/home/cart_item_controller.dart';
 class ShoppingCartController extends GetxController {
   RxList<SelectedProductData> cartProducts = <SelectedProductData>[].obs;
   final CartItemController cartItemController = Get.find<CartItemController>();
+  RxDouble totalSum = 0.0.obs;
 
   @override
   void onInit() {
@@ -22,6 +23,7 @@ class ShoppingCartController extends GetxController {
       cartProducts.value =
           productList.map((item) => SelectedProductData.fromMap(item)).toList();
       cartItemController.itemCount.value = productList.length;
+      _calculateTotalSum();
     }
   }
 
@@ -37,5 +39,13 @@ class ShoppingCartController extends GetxController {
     _loadCartProducts();
 
     cartItemController.itemCount.value = productList.length;
+  }
+
+  void _calculateTotalSum() {
+    double sum = 0.0;
+    for (var product in cartProducts) {
+      sum += product.total;
+    }
+    totalSum.value = sum;
   }
 }

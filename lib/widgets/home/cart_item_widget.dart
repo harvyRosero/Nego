@@ -39,7 +39,7 @@ class CartItemWidget extends StatelessWidget {
                   minHeight: 10,
                 ),
                 child: Text(
-                  ' ${cartItemController.itemCount.value} ',
+                  '${cartItemController.itemCount.value} ',
                   style: const TextStyle(
                     color: Colors.white,
                     fontSize: 6,

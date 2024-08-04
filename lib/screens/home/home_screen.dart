@@ -4,9 +4,9 @@ import 'package:get/get.dart';
 import 'package:agro/controllers/home/home_controller.dart';
 import 'package:agro/utils/app_colors.dart';
 import 'package:agro/widgets/profile/profile_screen_widget.dart';
-import 'package:agro/widgets/search_screen_widget.dart';
 import 'package:agro/widgets/notifications_screen_widget.dart';
 import 'package:agro/widgets/home/home_product_list_widget.dart';
+import 'package:agro/widgets/orders_widget.dart';
 
 class HomeScreen extends StatelessWidget {
   HomeScreen({super.key});
@@ -31,10 +31,10 @@ class HomeScreen extends StatelessWidget {
         return HomeProductListWidget(
           onScroll: _handleScroll,
         );
-      case 'Search':
-        return const SearchScreenWidget(
-            // onScroll: _handleScroll,
-            );
+      case 'Orders':
+        return OrdersWidget(
+          onScroll: _handleScroll,
+        );
       case 'Notifications':
         return const NotificationsScreenWidget(
             // onScroll: _handleScroll,
@@ -74,8 +74,8 @@ class HomeScreen extends StatelessWidget {
                 label: 'Inicio',
               ),
               BottomNavigationBarItem(
-                icon: Icon(Icons.search),
-                label: 'Buscar',
+                icon: Icon(Icons.dock),
+                label: 'Mis Pedidos',
               ),
               BottomNavigationBarItem(
                 icon: Icon(Icons.notifications),
@@ -94,7 +94,7 @@ class HomeScreen extends StatelessWidget {
     switch (homeController.currentScreen.value) {
       case 'Home':
         return 0;
-      case 'Search':
+      case 'Orders':
         return 1;
       case 'Notifications':
         return 2;
@@ -111,7 +111,7 @@ class HomeScreen extends StatelessWidget {
         homeController.changeScreen('Home');
         break;
       case 1:
-        homeController.changeScreen('Search');
+        homeController.changeScreen('Orders');
         break;
       case 2:
         homeController.changeScreen('Notifications');
