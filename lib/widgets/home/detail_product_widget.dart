@@ -41,6 +41,7 @@ class DetailProductWidget extends StatelessWidget {
     final double rating = arguments['rating']?.toDouble() ?? 0.0;
     final String category = arguments['category'] ?? '';
     final double price = arguments['price']?.toDouble() ?? 0.0;
+    final double promo = arguments['promo']?.toDouble() ?? 0.0;
     final String img = arguments['img'] ?? '';
 
     return Scaffold(
@@ -60,9 +61,9 @@ class DetailProductWidget extends StatelessWidget {
             const SizedBox(height: 16.0),
             _buildRating(rating, context),
             const SizedBox(height: 8.0),
-            _buildPrice(price, context),
+            _buildPrice(price, context, promo),
             const SizedBox(height: 16.0),
-            _buildQuantitySelector(context, price),
+            _buildQuantitySelector(context, price, promo),
             _buildAddToCartButton(context, arguments),
           ],
         ),
@@ -160,17 +161,41 @@ class DetailProductWidget extends StatelessWidget {
     );
   }
 
-  Widget _buildPrice(double price, BuildContext context) {
-    return Text(
-      '\$ ${price.toStringAsFixed(2)}',
-      style: Theme.of(context)
-          .textTheme
-          .headlineSmall
-          ?.copyWith(color: Colors.green[700]),
-    );
+  Widget _buildPrice(double price, BuildContext context, double promo) {
+    return promo > 0
+        ? Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                '\$ ${promo.toStringAsFixed(2)}',
+                style: Theme.of(context)
+                    .textTheme
+                    .headlineSmall
+                    ?.copyWith(color: Colors.green[700]),
+              ),
+              Text(
+                '\$ ${price.toStringAsFixed(2)}',
+                style: Theme.of(context)
+                    .textTheme
+                    .headlineSmall
+                    ?.copyWith(color: Colors.red[700], fontSize: 14),
+              )
+            ],
+          )
+        : Text(
+            '\$ ${price.toStringAsFixed(2)}',
+            style: Theme.of(context)
+                .textTheme
+                .headlineSmall
+                ?.copyWith(color: Colors.green[700]),
+          );
   }
 
-  Widget _buildQuantitySelector(BuildContext context, double price) {
+  Widget _buildQuantitySelector(
+      BuildContext context, double price, double promo) {
+    if (promo > 0) {
+      price = promo;
+    }
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -258,36 +283,37 @@ class DetailProductWidget extends StatelessWidget {
       ),
       child: ElevatedButton(
         onPressed: () async {
-          // Crear un objeto SelectedProductData
-          if (productDetailController.quantity.value == 1) {
-            final product = SelectedProductData(
-              pId: arguments['pId'] ?? '',
-              nombre: arguments['name'] ?? '',
-              nombreEmpresa: arguments['companyName'] ?? '',
-              descripcion: arguments['description'] ?? '',
-              precio: arguments['price']?.toDouble() ?? 0.0,
-              imagen: arguments['img'] ?? '',
-              total: arguments['price']?.toDouble() ?? 0.0,
-              cantidad: productDetailController.quantity.value,
-            );
-            productDetailController.addToCart(product);
-          } else {
-            final product = SelectedProductData(
-              pId: arguments['pId'] ?? '',
-              nombre: arguments['name'] ?? '',
-              nombreEmpresa: arguments['companyName'] ?? '',
-              descripcion: arguments['description'] ?? '',
-              precio: arguments['price']?.toDouble() ?? 0.0,
-              imagen: arguments['img'] ?? '',
-              total: productDetailController.totalValue.value,
-              cantidad: productDetailController.quantity.value,
-            );
-
-            productDetailController.addToCart(product);
+          if (arguments['estado'] == 'Agotado') {
+            Get.snackbar('Info',
+                'Este producto está agotado, por favor actualiza los productos e intenta más tarde');
+            return;
           }
+
+          double price = (arguments['price'] as num?)?.toDouble() ?? 0.0;
+          double price2 = (arguments['price'] as num?)?.toDouble() ?? 0.0;
+          final double promo = (arguments['promo'] as num?)?.toDouble() ?? 0.0;
+          if (promo > 0) {
+            price = promo;
+          }
+
+          final product = SelectedProductData(
+            pId: arguments['pId'] ?? '',
+            nombre: arguments['name'] ?? '',
+            precio: price2,
+            promo: promo,
+            imagen: arguments['img'] ?? '',
+            total: productDetailController.quantity.value == 1
+                ? price
+                : productDetailController.totalValue.value,
+            cantidad: productDetailController.quantity.value,
+          );
+
+          productDetailController.addToCart(product);
         },
         style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.verdeNavbar,
+          backgroundColor: arguments['estado'] == 'Agotado'
+              ? AppColors.gris
+              : AppColors.verdeNavbar,
           foregroundColor: AppColors.blanco,
           padding: const EdgeInsets.symmetric(vertical: 16.0),
           shape: RoundedRectangleBorder(
@@ -300,7 +326,9 @@ class DetailProductWidget extends StatelessWidget {
             const Icon(Icons.add_shopping_cart, size: 20),
             const SizedBox(width: 8.0),
             Text(
-              "Agregar al carrito",
+              arguments['estado'] == 'Agotado'
+                  ? "Producto Agotado"
+                  : "Agregar al carrito",
               style: GoogleFonts.montserrat(
                 fontSize: 16.0,
                 fontWeight: FontWeight.bold,

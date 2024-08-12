@@ -9,7 +9,9 @@ class ProductCard extends StatelessWidget {
   final String productName;
   final String productCompanyName;
   final double productPrice;
+  final double productPromo;
   final String productImage;
+  final String estado;
   final String productDescription;
   final double productRating;
   final int stock;
@@ -21,11 +23,13 @@ class ProductCard extends StatelessWidget {
     required this.productName,
     required this.productCompanyName,
     required this.productPrice,
+    required this.productPromo,
     required this.productImage,
     required this.productDescription,
     required this.productRating,
     required this.stock,
     required this.category,
+    required this.estado,
   }) : super(key: key);
 
   @override
@@ -39,10 +43,12 @@ class ProductCard extends StatelessWidget {
             'name': productName,
             'companyName': productCompanyName,
             'price': productPrice,
+            'promo': productPromo,
             'img': productImage,
             'description': productDescription,
             'rating': productRating,
             'category': category,
+            'estado': estado,
             'stock': stock,
           },
         );
@@ -55,68 +61,138 @@ class ProductCard extends StatelessWidget {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(10.0),
           ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          child: Stack(
             children: [
-              ClipRRect(
-                borderRadius:
-                    const BorderRadius.vertical(top: Radius.circular(10.0)),
-                child: CachedNetworkImage(
-                  imageUrl: productImage,
-                  fit: BoxFit.cover,
-                  height: 100,
-                  width: double.infinity,
-                  placeholder: (context, url) => const Center(
-                      child: CircularProgressIndicator(
-                    color: AppColors.verdeNavbar,
-                  )),
-                  errorWidget: (context, url, error) =>
-                      const Center(child: Icon(Icons.error)),
-                ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  ClipRRect(
+                    borderRadius:
+                        const BorderRadius.vertical(top: Radius.circular(10.0)),
+                    child: AspectRatio(
+                      aspectRatio: 1.5, // Ajusta la proporción según necesites
+                      child: CachedNetworkImage(
+                        imageUrl: productImage,
+                        fit: BoxFit.cover,
+                        width: double.infinity,
+                        placeholder: (context, url) => const Center(
+                          child: CircularProgressIndicator(
+                            color: AppColors.verdeNavbar,
+                          ),
+                        ),
+                        errorWidget: (context, url, error) => const Center(
+                          child: Icon(Icons.error),
+                        ),
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(
+                            child: Text(
+                              productName,
+                              style: TextStyle(
+                                fontSize:
+                                    MediaQuery.of(context).size.width * 0.04,
+                                fontWeight: FontWeight.bold,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          Expanded(
+                            child: Text(
+                              productDescription,
+                              style: TextStyle(
+                                fontSize:
+                                    MediaQuery.of(context).size.width * 0.03,
+                                color: Colors.grey[700],
+                                height: 1,
+                              ),
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          productPromo > 0
+                              ? Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      '\$ $productPromo COP',
+                                      style: TextStyle(
+                                        color: AppColors.verdeLetras,
+                                        fontSize:
+                                            MediaQuery.of(context).size.width *
+                                                0.035,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    Text(
+                                      '\$ $productPrice COP',
+                                      style: TextStyle(
+                                        fontSize:
+                                            MediaQuery.of(context).size.width *
+                                                0.025,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.red,
+                                        decoration: TextDecoration.lineThrough,
+                                      ),
+                                    ),
+                                  ],
+                                )
+                              : Text(
+                                  '\$ $productPrice COP',
+                                  style: TextStyle(
+                                    fontSize:
+                                        MediaQuery.of(context).size.width *
+                                            0.035,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                          Row(
+                            children: List.generate(5, (index) {
+                              return Icon(
+                                index < productRating
+                                    ? Icons.star
+                                    : Icons.star_border,
+                                color: Colors.amber,
+                                size: 12,
+                              );
+                            }),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
               ),
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Expanded(
-                        child: Text(
-                          productName,
-                          style: const TextStyle(
-                              fontSize: 14, fontWeight: FontWeight.bold),
-                          overflow: TextOverflow.ellipsis,
-                        ),
+              if (productPromo > 0)
+                Positioned(
+                  top: 0,
+                  left: 0,
+                  child: Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: const BoxDecoration(
+                      color: Colors.redAccent,
+                      borderRadius: BorderRadius.only(
+                        topLeft: Radius.circular(16),
+                        bottomRight: Radius.circular(16),
                       ),
-                      Expanded(
-                        child: Text(
-                          productDescription,
-                          style: TextStyle(
-                              fontSize: 12, color: Colors.grey[700], height: 1),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                        ),
+                    ),
+                    child: Text(
+                      'Promo',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: MediaQuery.of(context).size.width * 0.03,
+                        fontWeight: FontWeight.bold,
                       ),
-                      Text(
-                        '\$ $productPrice',
-                        style: const TextStyle(
-                            fontSize: 14, fontWeight: FontWeight.bold),
-                      ),
-                      Row(
-                        children: List.generate(5, (index) {
-                          return Icon(
-                            index < productRating
-                                ? Icons.star
-                                : Icons.star_border,
-                            color: Colors.amber,
-                            size: 12,
-                          );
-                        }),
-                      ),
-                    ],
+                    ),
                   ),
                 ),
-              ),
             ],
           ),
         ),

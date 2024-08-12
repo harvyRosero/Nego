@@ -25,14 +25,14 @@ class HomeProductListController extends GetxController {
   Future<void> fetchPage(int pageKey) async {
     try {
       final snapshot = await FirebaseFirestore.instance
-          .collection('productos')
-          .orderBy('nombre')
+          .collection('Productos')
+          .orderBy('name')
           .startAfter([pageKey])
           .limit(_pageSize)
           .get();
 
       final newItems = snapshot.docs.map((doc) {
-        return ProductData.fromMap(doc.data());
+        return ProductData.fromDocument(doc);
       }).toList();
 
       final isLastPage = newItems.length < _pageSize;

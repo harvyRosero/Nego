@@ -74,10 +74,28 @@ class ShoppingCartScreen extends StatelessWidget {
                   const SizedBox(height: 4),
                   Text('Cantidad: x${product.cantidad}'),
                   const SizedBox(height: 4),
-                  Text(
-                    '\$ ${product.precio.toStringAsFixed(2)}',
-                    style: const TextStyle(color: AppColors.gris),
-                  ),
+                  product.promo > 0
+                      ? Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              '\$ ${product.promo.toStringAsFixed(2)} COP',
+                              style:
+                                  const TextStyle(color: AppColors.verdeLetras),
+                            ),
+                            Text(
+                              '\$ ${product.precio.toStringAsFixed(2)} COP',
+                              style: const TextStyle(
+                                  color: Colors.red,
+                                  fontSize: 11,
+                                  decoration: TextDecoration.lineThrough),
+                            ),
+                          ],
+                        )
+                      : Text(
+                          '\$ ${product.precio.toStringAsFixed(2)} COP',
+                          style: const TextStyle(color: AppColors.gris),
+                        ),
                 ],
               ),
             ),

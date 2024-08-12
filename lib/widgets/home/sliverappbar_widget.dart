@@ -1,6 +1,8 @@
+import 'package:agro/routes/app_routes.dart';
 import 'package:agro/utils/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:agro/widgets/home/cart_item_widget.dart';
+import 'package:get/get.dart';
 
 Widget buildSliverAppBar() {
   return SliverAppBar(
@@ -39,30 +41,35 @@ Widget _buildHeader() {
 }
 
 Widget _buildSearchButton() {
-  return Container(
-    height: 30,
-    padding: const EdgeInsets.symmetric(horizontal: 8.0),
-    decoration: BoxDecoration(
-      color: Colors.white,
-      borderRadius: BorderRadius.circular(12.0),
-      boxShadow: [
-        BoxShadow(
-          color: Colors.black.withOpacity(0.1),
-          blurRadius: 4.0,
-          spreadRadius: 1.0,
-        ),
-      ],
-    ),
-    child: const Row(
-      children: [
-        Icon(Icons.search, color: Colors.grey),
-        SizedBox(width: 8.0),
-        Expanded(
-            child: Text(
-          "¿Que estas buscando?",
-          style: TextStyle(color: AppColors.grisLetras),
-        )),
-      ],
+  return GestureDetector(
+    onTap: () {
+      Get.toNamed(AppRoutes.search);
+    },
+    child: Container(
+      height: 30,
+      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12.0),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 4.0,
+            spreadRadius: 1.0,
+          ),
+        ],
+      ),
+      child: const Row(
+        children: [
+          Icon(Icons.search, color: Colors.grey),
+          SizedBox(width: 8.0),
+          Expanded(
+              child: Text(
+            "¿Que estas buscando?",
+            style: TextStyle(color: AppColors.grisLetras),
+          )),
+        ],
+      ),
     ),
   );
 }
