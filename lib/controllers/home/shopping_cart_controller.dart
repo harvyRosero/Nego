@@ -12,10 +12,10 @@ class ShoppingCartController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    _loadCartProducts();
+    loadCartProducts();
   }
 
-  Future<void> _loadCartProducts() async {
+  Future<void> loadCartProducts() async {
     final prefs = await SharedPreferences.getInstance();
     String? productListStr = prefs.getString('productos');
     if (productListStr != null) {
@@ -36,7 +36,16 @@ class ShoppingCartController extends GetxController {
     productList.removeWhere((item) => item['pId'] == productId);
 
     await prefs.setString('productos', json.encode(productList));
-    _loadCartProducts();
+    loadCartProducts();
+
+    cartItemController.itemCount.value = productList.length;
+  }
+
+  Future<void> updateCartItemCount() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? productListStr = prefs.getString('productos');
+    List<dynamic> productList =
+        productListStr != null ? json.decode(productListStr) : [];
 
     cartItemController.itemCount.value = productList.length;
   }

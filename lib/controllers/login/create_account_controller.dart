@@ -150,6 +150,7 @@ class CreateAccountController extends GetxController {
         'detallesUbicacion': '',
         'lat': '',
         'lng': '',
+        'token': '',
         'createdAt': FieldValue.serverTimestamp(),
       });
 
@@ -238,6 +239,7 @@ class CreateAccountController extends GetxController {
       'direccion': '',
       'lat': '',
       'lng': '',
+      'token': '',
       'createdAt': FieldValue.serverTimestamp(),
     });
   }

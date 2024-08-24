@@ -6,45 +6,66 @@ import 'package:agro/models/product_model.dart';
 
 class HomeProductListController extends GetxController {
   static const _pageSize = 10;
-
-  final PagingController<int, ProductData> pagingController =
-      PagingController(firstPageKey: 0);
-
-  var publicidadImages =
-      <String>[].obs; // Lista para almacenar URLs de imágenes
+  late PagingController<int, ProductData> pagingController;
+  DocumentSnapshot? lastDocument;
+  var publicidadImages = <String>[].obs;
+  final Set<String> fetchedProductIds = <String>{};
 
   @override
   void onInit() {
+    pagingController = PagingController(firstPageKey: 0);
+
     pagingController.addPageRequestListener((pageKey) {
       fetchPage(pageKey);
     });
-    fetchPublicidadData(); // Llamar a la función para obtener datos de publicidad al iniciar
+
+    fetchPublicidadData();
     super.onInit();
   }
 
   Future<void> fetchPage(int pageKey) async {
     try {
-      final snapshot = await FirebaseFirestore.instance
+      Query query = FirebaseFirestore.instance
           .collection('Productos')
           .orderBy('name')
-          .startAfter([pageKey])
-          .limit(_pageSize)
-          .get();
+          .limit(_pageSize);
+
+      if (pageKey != 0 && lastDocument != null) {
+        query = query.startAfterDocument(lastDocument!);
+      }
+
+      final snapshot = await query.get();
+
+      if (isClosed) return;
 
       final newItems = snapshot.docs.map((doc) {
         return ProductData.fromDocument(doc);
       }).toList();
 
-      final isLastPage = newItems.length < _pageSize;
+      final uniqueItems = newItems.where((item) {
+        final isUnique = !fetchedProductIds.contains(item.id);
+        if (isUnique) {
+          fetchedProductIds.add(item.id);
+        }
+        return isUnique;
+      }).toList();
+
+      if (snapshot.docs.isNotEmpty) {
+        lastDocument = snapshot.docs.last;
+      }
+
+      final isLastPage = uniqueItems.length < _pageSize;
       if (isLastPage) {
-        pagingController.appendLastPage(newItems);
+        pagingController.appendLastPage(uniqueItems);
       } else {
-        final nextPageKey = pageKey + newItems.length;
-        pagingController.appendPage(newItems, nextPageKey);
+        final nextPageKey = pageKey + uniqueItems.length;
+        pagingController.appendPage(uniqueItems, nextPageKey);
       }
     } catch (e) {
-      SnackbarUtils.info('No se pudo obtener todos los datos');
-      pagingController.error = e;
+      if (!isClosed) {
+        SnackbarUtils.info('No se pudo obtener todos los datos');
+        pagingController.error = e;
+      }
     }
   }
 
@@ -58,12 +79,10 @@ class HomeProductListController extends GetxController {
       if (docSnapshot.exists) {
         final data = docSnapshot.data() ?? {};
 
-        // Extrae los valores de los campos que contienen URLs de imágenes
         publicidadImages.value = [
           data['1'] as String? ?? '',
           data['2'] as String? ?? '',
           data['3'] as String? ?? '',
-          // Añadir más campos si es necesario
         ].where((url) => url.isNotEmpty).toList();
       } else {
         SnackbarUtils.info('El documento de publicidad no existe');

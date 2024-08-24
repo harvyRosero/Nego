@@ -12,7 +12,7 @@ import 'package:agro/models/product_model.dart';
 class HomeProductListWidget extends StatelessWidget {
   final Function(ScrollNotification) onScroll;
   final HomeProductListController homeProductListController =
-      Get.put(HomeProductListController());
+      Get.put(HomeProductListController(), permanent: true);
 
   HomeProductListWidget({super.key, required this.onScroll});
 
@@ -24,47 +24,41 @@ class HomeProductListWidget extends StatelessWidget {
           onScroll(scrollInfo);
           return false;
         },
-        child: RefreshIndicator(
-          onRefresh: _refreshData,
-          child: CustomScrollView(
-            slivers: [
-              buildSliverAppBar(),
-              SliverToBoxAdapter(
-                child: _buildCarousel(),
+        child: CustomScrollView(
+          physics: const BouncingScrollPhysics(),
+          slivers: [
+            buildSliverAppBar(),
+            SliverToBoxAdapter(
+              child: _buildCarousel(),
+            ),
+            PagedSliverGrid<int, ProductData>(
+              pagingController: homeProductListController.pagingController,
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                mainAxisSpacing: 10,
+                crossAxisSpacing: 10,
+                childAspectRatio: 0.75,
               ),
-              PagedSliverGrid<int, ProductData>(
-                pagingController: homeProductListController.pagingController,
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  mainAxisSpacing: 10,
-                  crossAxisSpacing: 10,
-                  childAspectRatio: 0.75,
-                ),
-                builderDelegate: PagedChildBuilderDelegate<ProductData>(
-                  itemBuilder: (context, product, index) => ProductCard(
-                    productId: product.id,
-                    productName: product.name,
-                    productCompanyName: 'Nego',
-                    productPrice: product.price,
-                    productPromo: product.promo,
-                    productImage: product.imageUrl,
-                    productDescription: product.description,
-                    productRating: product.rating,
-                    category: product.category,
-                    estado: product.estado,
-                    stock: product.stock,
-                  ),
+              builderDelegate: PagedChildBuilderDelegate<ProductData>(
+                itemBuilder: (context, product, index) => ProductCard(
+                  productId: product.id,
+                  productName: product.name,
+                  productCompanyName: 'Nego',
+                  productPrice: product.price,
+                  productPromo: product.promo,
+                  productImage: product.imageUrl,
+                  productDescription: product.description,
+                  productRating: product.rating,
+                  category: product.category,
+                  estado: product.estado,
+                  stock: product.stock,
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       );
     });
-  }
-
-  Future<void> _refreshData() async {
-    return homeProductListController.pagingController.refresh();
   }
 
   Widget _buildCarousel() {

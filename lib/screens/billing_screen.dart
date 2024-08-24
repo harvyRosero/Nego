@@ -105,7 +105,8 @@ class BillingScreen extends StatelessWidget {
               Center(
                 child: ElevatedButton(
                   onPressed: () {
-                    // Acción del botón de pagar
+                    billingController.sendOrderToFirebase();
+                    Get.offAllNamed(AppRoutes.home);
                   },
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(

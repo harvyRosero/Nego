@@ -16,6 +16,7 @@ class ProductData {
   final double rating;
   final List<String> tags;
   final String imageUrl;
+  final DocumentReference reference;
 
   ProductData({
     required this.id,
@@ -33,6 +34,7 @@ class ProductData {
     required this.rating,
     required this.tags,
     required this.imageUrl,
+    required this.reference,
   });
 
   factory ProductData.fromDocument(DocumentSnapshot doc) {
@@ -41,18 +43,19 @@ class ProductData {
       name: data['name'] as String,
       id: data['id'] as String,
       description: data['description'] as String,
-      price: data['price'] as double,
-      promo: data['promo'] as double,
+      price: (data['price'] as num).toDouble(),
+      promo: (data['promo'] as num).toDouble(),
       category: data['category'] as String,
       ownerId: data['ownerId'] as String,
-      createdAt: data['createdAt'],
-      updatedAt: data['updatedAt'],
-      estado: data['estado'],
+      createdAt: data['createdAt'] as String,
+      updatedAt: data['updatedAt'] as String,
+      estado: data['estado'] as String,
       stock: data['stock'] as int,
       sold: data['sold'] as int,
       rating: (data['rating'] as num).toDouble(),
-      tags: List<String>.from(data['tags']),
+      tags: List<String>.from(data['tags'] as List),
       imageUrl: data['imageUrl'] as String,
+      reference: doc.reference,
     );
   }
 

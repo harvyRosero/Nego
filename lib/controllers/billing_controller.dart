@@ -1,11 +1,17 @@
 import 'dart:convert';
-
+import 'package:agro/controllers/home/cart_item_controller.dart';
 import 'package:agro/models/selected_product_model.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:firebase_database/firebase_database.dart';
+import 'package:agro/models/order_model.dart';
 
 class BillingController extends GetxController {
+  final CartItemController cartItemController = Get.find<CartItemController>();
+
   var userName = ''.obs;
+  var uid = ''.obs;
   var gmail = ''.obs;
   var direccion = ''.obs;
   var lng = ''.obs;
@@ -14,9 +20,11 @@ class BillingController extends GetxController {
   var celular = ''.obs;
   var detallesUbicacion = ''.obs;
   var barrio = ''.obs;
+  var appState = ''.obs;
 
   RxList<SelectedProductData> cartProducts = <SelectedProductData>[].obs;
   RxDouble totalSum = 0.0.obs;
+
   @override
   void onInit() {
     super.onInit();
@@ -26,6 +34,7 @@ class BillingController extends GetxController {
 
   Future<void> getUserData() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
+    uid.value = prefs.getString('userId') ?? '';
     gmail.value = prefs.getString('gmail') ?? '';
     userName.value = prefs.getString('userName') ?? '';
     direccion.value = prefs.getString('direccion') ?? '';
@@ -54,5 +63,68 @@ class BillingController extends GetxController {
       sum += product.total;
     }
     totalSum.value = sum;
+  }
+
+  Future<void> sendOrderToFirebase() async {
+    appState.value = (await _getEstadoFromServicio())!;
+    if (direccion.value.isEmpty) {
+      Get.snackbar('Informacion', 'No tiene una direccion agreda!');
+      return;
+    }
+    if (appState.value != 'activo') {
+      Get.snackbar('Informacion',
+          'Nuestro servicio se encuentra inactivo por ahora, intenta en otro horario!');
+      return;
+    }
+    DatabaseReference myOrdersRef =
+        FirebaseDatabase.instance.ref().child('orders');
+
+    MyOrder myOrder = MyOrder(
+      uid: uid.value,
+      userName: userName.value,
+      gmail: gmail.value,
+      direccion: direccion.value,
+      lat: lat.value,
+      lng: lng.value,
+      ciudad: ciudad.value,
+      celular: celular.value,
+      detallesUbicacion: detallesUbicacion.value,
+      barrio: barrio.value,
+      state: 'Pedido recibido',
+      totalSum: totalSum.value,
+      products: cartProducts.toList(),
+      createdAt: DateTime.now().toIso8601String(),
+    );
+    try {
+      await myOrdersRef.push().set(myOrder.toMap());
+      _clearCart();
+      Get.snackbar('Informacion', '¡Pedido enviado!');
+    } catch (e) {
+      Get.snackbar('ERROR', 'No se pudo enviar tu pedido, intentalo más tarde');
+    }
+  }
+
+  void _clearCart() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.remove('productos');
+  }
+
+  Future<String?> _getEstadoFromServicio() async {
+    try {
+      DocumentSnapshot<Map<String, dynamic>> docSnapshot =
+          await FirebaseFirestore.instance
+              .collection('DataApp')
+              .doc('servicio')
+              .get();
+
+      if (docSnapshot.exists && docSnapshot.data() != null) {
+        String? estado = docSnapshot.data()!['estado'] as String?;
+        return estado;
+      } else {
+        return null;
+      }
+    } catch (e) {
+      return null;
+    }
   }
 }

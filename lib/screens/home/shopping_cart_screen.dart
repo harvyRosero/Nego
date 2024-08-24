@@ -14,6 +14,12 @@ class ShoppingCartScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Carrito de compras"),
+        leading: IconButton(
+            onPressed: () {
+              Get.back();
+              _controller.updateCartItemCount();
+            },
+            icon: const Icon(Icons.arrow_back_ios)),
       ),
       body: Column(
         children: [
@@ -130,7 +136,7 @@ class ShoppingCartScreen extends StatelessWidget {
           Obx(() {
             return Expanded(
               child: Text(
-                'Total: \$ ${_controller.totalSum.value.toStringAsFixed(2)}',
+                'Total: \$ ${_controller.totalSum.value.toStringAsFixed(2)} COP',
                 style: Theme.of(context).textTheme.titleLarge?.copyWith(
                     fontWeight: FontWeight.bold, color: AppColors.verdeNavbar),
               ),
@@ -139,7 +145,9 @@ class ShoppingCartScreen extends StatelessWidget {
           const SizedBox(width: 16),
           ElevatedButton(
             onPressed: () {
-              Get.toNamed(AppRoutes.billing);
+              _controller.totalSum.value == 0
+                  ? () {}
+                  : Get.toNamed(AppRoutes.billing);
             },
             style: ElevatedButton.styleFrom(
               padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 25),

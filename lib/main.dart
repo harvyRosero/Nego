@@ -5,14 +5,20 @@ import 'firebase_options.dart';
 import 'package:agro/routes/app_routes.dart';
 import 'package:agro/controllers/login/login_controller.dart';
 import 'utils/app_colors.dart';
+import 'services/push_notifications.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+  final PushNotificationsProvider pushNotificationsProvider =
+      PushNotificationsProvider();
   final LoginController controller = Get.put(LoginController());
   bool isSignedIn = await controller.checkUser();
+  if (isSignedIn) {
+    pushNotificationsProvider.initNotifications();
+  }
   runApp(MyApp(isSignedIn: isSignedIn));
 }
 

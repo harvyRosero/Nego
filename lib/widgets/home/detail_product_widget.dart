@@ -53,13 +53,26 @@ class DetailProductWidget extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildProductImage(img),
-            const SizedBox(height: 16.0),
-            _buildProductDetails(name, description, companyName, context),
+            Container(
+              decoration: const BoxDecoration(color: AppColors.grisClaro),
+              child: Padding(
+                padding: const EdgeInsets.all(10.0),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildProductImage(img),
+                    const SizedBox(height: 16.0),
+                    _buildProductDetails(
+                        name, description, companyName, context),
+                  ],
+                ),
+              ),
+            ),
             const SizedBox(height: 16.0),
             _buildStockAndCategory(stock, category, context),
             const SizedBox(height: 16.0),
-            _buildRating(rating, context),
+            _buildRating(rating),
             const SizedBox(height: 8.0),
             _buildPrice(price, context, promo),
             const SizedBox(height: 16.0),
@@ -145,19 +158,15 @@ class DetailProductWidget extends StatelessWidget {
     );
   }
 
-  Widget _buildRating(double rating, BuildContext context) {
+  Widget _buildRating(double rating) {
     return Row(
-      children: [
-        const Icon(
+      children: List.generate(5, (index) {
+        return Icon(
           Icons.star,
-          color: Colors.amber,
-        ),
-        const SizedBox(width: 4.0),
-        Text(
-          rating.toString(),
-          style: Theme.of(context).textTheme.bodyLarge,
-        ),
-      ],
+          color: index < rating ? Colors.amber : Colors.grey[400],
+          size: 20.0,
+        );
+      }),
     );
   }
 
@@ -309,6 +318,7 @@ class DetailProductWidget extends StatelessWidget {
           );
 
           productDetailController.addToCart(product);
+          Get.back();
         },
         style: ElevatedButton.styleFrom(
           backgroundColor: arguments['estado'] == 'Agotado'

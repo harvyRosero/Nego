@@ -2,7 +2,6 @@ import 'package:agro/routes/app_routes.dart';
 import 'package:agro/utils/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 
 class ProductCard extends StatelessWidget {
   final String productId;
@@ -68,23 +67,30 @@ class ProductCard extends StatelessWidget {
                 children: [
                   ClipRRect(
                     borderRadius:
-                        const BorderRadius.vertical(top: Radius.circular(10.0)),
+                        const BorderRadius.vertical(top: Radius.circular(16.0)),
                     child: AspectRatio(
-                      aspectRatio: 1.5, // Ajusta la proporción según necesites
-                      child: CachedNetworkImage(
-                        imageUrl: productImage,
-                        fit: BoxFit.cover,
-                        width: double.infinity,
-                        placeholder: (context, url) => const Center(
-                          child: CircularProgressIndicator(
-                            color: AppColors.verdeNavbar,
+                        aspectRatio:
+                            1.5, // Ajusta la proporción según necesites
+                        child: Image.network(
+                          productImage,
+                          fit: BoxFit.cover,
+                          width: double.infinity,
+                          loadingBuilder: (context, child, loadingProgress) {
+                            if (loadingProgress == null) {
+                              return child;
+                            } else {
+                              return const Center(
+                                child: CircularProgressIndicator(
+                                  color: AppColors.verdeNavbar,
+                                ),
+                              );
+                            }
+                          },
+                          errorBuilder: (context, error, stackTrace) =>
+                              const Center(
+                            child: Icon(Icons.error),
                           ),
-                        ),
-                        errorWidget: (context, url, error) => const Center(
-                          child: Icon(Icons.error),
-                        ),
-                      ),
-                    ),
+                        )),
                   ),
                   Expanded(
                     child: Padding(

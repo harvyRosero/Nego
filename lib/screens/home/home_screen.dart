@@ -36,9 +36,9 @@ class HomeScreen extends StatelessWidget {
           onScroll: _handleScroll,
         );
       case 'Notifications':
-        return const NotificationsScreenWidget(
-            // onScroll: _handleScroll,
-            );
+        return NotificationsScreenWidget(
+          onScroll: _handleScroll,
+        );
       case 'Profile':
         return ProfileScreenWidget(
           onScroll: _handleScroll,
