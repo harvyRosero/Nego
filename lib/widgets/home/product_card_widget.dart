@@ -2,6 +2,7 @@ import 'package:agro/routes/app_routes.dart';
 import 'package:agro/utils/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 
 class ProductCard extends StatelessWidget {
   final String productId;
@@ -33,27 +34,21 @@ class ProductCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final NumberFormat currencyFormat = NumberFormat.currency(
+      locale: 'es',
+      symbol: 'COP',
+      decimalDigits: 2,
+    );
+
     return GestureDetector(
       onTap: () {
         Get.toNamed(
           AppRoutes.detailProduct,
-          arguments: {
-            'pId': productId,
-            'name': productName,
-            'companyName': productCompanyName,
-            'price': productPrice,
-            'promo': productPromo,
-            'img': productImage,
-            'description': productDescription,
-            'rating': productRating,
-            'category': category,
-            'estado': estado,
-            'stock': stock,
-          },
+          arguments: {'pId': productId, 'category': category},
         );
       },
       child: AspectRatio(
-        aspectRatio: 0.75,
+        aspectRatio: 0.65,
         child: Card(
           color: AppColors.blanco,
           elevation: 3.0,
@@ -66,32 +61,28 @@ class ProductCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   ClipRRect(
-                    borderRadius:
-                        const BorderRadius.vertical(top: Radius.circular(16.0)),
-                    child: AspectRatio(
+                      borderRadius: const BorderRadius.vertical(
+                          top: Radius.circular(16.0)),
+                      child: AspectRatio(
                         aspectRatio:
-                            1.5, // Ajusta la proporción según necesites
+                            1.0, // Ajusta la proporción según necesites
                         child: Image.network(
                           productImage,
                           fit: BoxFit.cover,
-                          width: double.infinity,
                           loadingBuilder: (context, child, loadingProgress) {
-                            if (loadingProgress == null) {
-                              return child;
-                            } else {
-                              return const Center(
-                                child: CircularProgressIndicator(
-                                  color: AppColors.verdeNavbar,
-                                ),
-                              );
-                            }
+                            if (loadingProgress == null) return child;
+                            return const Center(
+                              child: CircularProgressIndicator(
+                                color: AppColors.verdeNavbar,
+                              ),
+                            );
                           },
                           errorBuilder: (context, error, stackTrace) =>
                               const Center(
-                            child: Icon(Icons.error),
+                            child: Icon(Icons.error, color: Colors.red),
                           ),
-                        )),
-                  ),
+                        ),
+                      )),
                   Expanded(
                     child: Padding(
                       padding: const EdgeInsets.all(8.0),
@@ -103,22 +94,9 @@ class ProductCard extends StatelessWidget {
                               productName,
                               style: TextStyle(
                                 fontSize:
-                                    MediaQuery.of(context).size.width * 0.04,
+                                    MediaQuery.of(context).size.width * 0.047,
                                 fontWeight: FontWeight.bold,
                               ),
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                          Expanded(
-                            child: Text(
-                              productDescription,
-                              style: TextStyle(
-                                fontSize:
-                                    MediaQuery.of(context).size.width * 0.03,
-                                color: Colors.grey[700],
-                                height: 1,
-                              ),
-                              maxLines: 2,
                               overflow: TextOverflow.ellipsis,
                             ),
                           ),
@@ -127,7 +105,7 @@ class ProductCard extends StatelessWidget {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
-                                      '\$ $productPromo COP',
+                                      currencyFormat.format(productPromo),
                                       style: TextStyle(
                                         color: AppColors.verdeLetras,
                                         fontSize:
@@ -137,7 +115,7 @@ class ProductCard extends StatelessWidget {
                                       ),
                                     ),
                                     Text(
-                                      '\$ $productPrice COP',
+                                      currencyFormat.format(productPrice),
                                       style: TextStyle(
                                         fontSize:
                                             MediaQuery.of(context).size.width *
@@ -149,14 +127,31 @@ class ProductCard extends StatelessWidget {
                                     ),
                                   ],
                                 )
-                              : Text(
-                                  '\$ $productPrice COP',
-                                  style: TextStyle(
-                                    fontSize:
-                                        MediaQuery.of(context).size.width *
-                                            0.035,
-                                    fontWeight: FontWeight.bold,
-                                  ),
+                              : Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      productDescription,
+                                      maxLines: 1,
+                                      style: TextStyle(
+                                          fontSize: MediaQuery.of(context)
+                                                  .size
+                                                  .width *
+                                              0.03,
+                                          fontWeight: FontWeight.w500,
+                                          color: AppColors.grisLetras),
+                                    ),
+                                    Text(
+                                      currencyFormat.format(productPrice),
+                                      style: TextStyle(
+                                          fontSize: MediaQuery.of(context)
+                                                  .size
+                                                  .width *
+                                              0.035,
+                                          fontWeight: FontWeight.bold,
+                                          color: AppColors.grisLetras),
+                                    ),
+                                  ],
                                 ),
                           Row(
                             children: List.generate(5, (index) {

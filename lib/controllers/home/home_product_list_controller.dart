@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:agro/widgets/snackbars.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import 'package:agro/models/product_model.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class HomeProductListController extends GetxController {
   static const _pageSize = 10;
@@ -13,21 +14,35 @@ class HomeProductListController extends GetxController {
 
   @override
   void onInit() {
+    super.onInit();
     pagingController = PagingController(firstPageKey: 0);
-
     pagingController.addPageRequestListener((pageKey) {
       fetchPage(pageKey);
     });
 
     fetchPublicidadData();
-    super.onInit();
+  }
+
+  Future<void> refreshData() async {
+    fetchedProductIds.clear();
+    lastDocument = null;
+    pagingController.refresh(); // Refresca la lista de productos
+    await fetchPublicidadData(); // Refresca las imágenes de publicidad
+  }
+
+  Future<String> getUbicationData() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    String city = prefs.getString('ciudad').toString();
+    return city;
   }
 
   Future<void> fetchPage(int pageKey) async {
+    String city = await getUbicationData();
+    String colleccion = 'Productos$city';
     try {
       Query query = FirebaseFirestore.instance
-          .collection('Productos')
-          .orderBy('name')
+          .collection(colleccion)
+          .orderBy('tipo')
           .limit(_pageSize);
 
       if (pageKey != 0 && lastDocument != null) {
@@ -63,7 +78,7 @@ class HomeProductListController extends GetxController {
       }
     } catch (e) {
       if (!isClosed) {
-        SnackbarUtils.info('No se pudo obtener todos los datos');
+        SnackbarUtils.info('No se pudo obtener los datos. Intenta de nuevo.');
         pagingController.error = e;
       }
     }
@@ -79,16 +94,13 @@ class HomeProductListController extends GetxController {
       if (docSnapshot.exists) {
         final data = docSnapshot.data() ?? {};
 
-        publicidadImages.value = [
-          data['1'] as String? ?? '',
-          data['2'] as String? ?? '',
-          data['3'] as String? ?? '',
-        ].where((url) => url.isNotEmpty).toList();
+        publicidadImages.value = data.values.whereType<String>().toList();
       } else {
         SnackbarUtils.info('El documento de publicidad no existe');
       }
     } catch (e) {
-      SnackbarUtils.info('No se pudo obtener los datos de publicidad');
+      SnackbarUtils.info(
+          'No se pudo obtener los datos de publicidad. Intenta de nuevo.');
     }
   }
 

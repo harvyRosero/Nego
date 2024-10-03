@@ -11,6 +11,7 @@ class ProductData {
   final String createdAt;
   final String updatedAt;
   final String estado;
+  final String tipo;
   final int stock;
   final int sold;
   final double rating;
@@ -29,6 +30,7 @@ class ProductData {
     required this.createdAt,
     required this.updatedAt,
     required this.estado,
+    required this.tipo,
     required this.stock,
     required this.sold,
     required this.rating,
@@ -50,6 +52,7 @@ class ProductData {
       createdAt: data['createdAt'] as String,
       updatedAt: data['updatedAt'] as String,
       estado: data['estado'] as String,
+      tipo: data['tipo'] as String,
       stock: data['stock'] as int,
       sold: data['sold'] as int,
       rating: (data['rating'] as num).toDouble(),
@@ -71,6 +74,7 @@ class ProductData {
       'createdAt': createdAt,
       'updatedAt': updatedAt,
       'estado': estado,
+      'tipo': tipo,
       'stock': stock,
       'sold': sold,
       'rating': rating,

@@ -1,5 +1,7 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 import 'package:timeago/timeago.dart' as timeago;
 import 'package:agro/controllers/orders_controller.dart';
 import 'package:agro/utils/app_colors.dart';
@@ -16,64 +18,30 @@ class OrdersWidget extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const SizedBox(
-          height: 40,
-        ),
+        const SizedBox(height: 40),
         const Padding(
           padding: EdgeInsets.only(left: 20.0),
           child: Text(
             'Pedidos',
             style: TextStyle(
-                color: AppColors.verdeNavbar,
-                fontSize: 20,
-                fontWeight: FontWeight.bold),
+              color: AppColors.verdeNavbar,
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+            ),
           ),
         ),
         Expanded(
           child: Obx(
             () => ordersController.ordersList.isEmpty
-                ? Center(
-                    child: Padding(
-                      padding: const EdgeInsets.all(32.0),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            Icons.inbox,
-                            size: 80.0,
-                            color: Colors.grey[400],
-                          ),
-                          const SizedBox(height: 24.0),
-                          Text(
-                            'No se encontraron órdenes',
-                            style: TextStyle(
-                              fontSize: 18.0,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.grey[700],
-                            ),
-                          ),
-                          const SizedBox(height: 16.0),
-                          Text(
-                            'Parece que no tienes órdenes pendientes en este momento. \nLas órdenes que realices aparecerán aquí.',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              fontSize: 14.0,
-                              color: Colors.grey[600],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  )
+                ? const _EmptyOrders()
                 : ListView.builder(
                     itemCount: ordersController.ordersList.length,
                     itemBuilder: (context, index) {
-                      final Map<String, dynamic> order =
-                          Map<String, dynamic>.from(
-                              ordersController.ordersList[index]);
-                      final List<dynamic> products = order['products'] ?? [];
-
-                      return OrderCard(order: order, products: products);
+                      final order = ordersController.ordersList[index];
+                      return OrderCard(
+                        order: Map<String, dynamic>.from(order),
+                        products: order['products'] ?? [],
+                      );
                     },
                   ),
           ),
@@ -83,190 +51,337 @@ class OrdersWidget extends StatelessWidget {
   }
 }
 
-class OrderCard extends StatelessWidget {
-  final Map<String, dynamic> order;
-  final List<dynamic> products;
-
-  OrderCard({Key? key, required this.order, required this.products})
-      : super(key: key);
-
-  final OrdersController controller = Get.put(OrdersController());
+class _EmptyOrders extends StatelessWidget {
+  const _EmptyOrders();
 
   @override
   Widget build(BuildContext context) {
-    DateTime orderDate =
-        DateTime.parse(order['createdAt'] ?? DateTime.now().toIso8601String());
-
-    return Card(
-      elevation: 6.0,
-      color: AppColors.grisClaro2,
-      margin: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 16.0),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12.0),
-      ),
+    return Center(
       child: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(32.0),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            _buildOrderDate(orderDate),
-            _buildOrderDetails(),
+            Icon(Icons.inbox, size: 80.0, color: Colors.grey[400]),
+            const SizedBox(height: 24.0),
+            Text(
+              'No se encontraron órdenes',
+              style: TextStyle(
+                fontSize: 18.0,
+                fontWeight: FontWeight.bold,
+                color: Colors.grey[700],
+              ),
+            ),
             const SizedBox(height: 16.0),
-            const Divider(thickness: 1.2, color: AppColors.grisClaro),
-            const SizedBox(height: 16.0),
-            _buildProductToggle(),
-            const SizedBox(height: 12.0),
-            _buildProductList(),
-            const SizedBox(height: 16.0),
-            const Divider(thickness: 1.2, color: AppColors.gris),
-            const SizedBox(height: 16.0),
-            _buildTotalAmount(),
-            const SizedBox(height: 16.0),
-            _buildStateRow(),
-            const SizedBox(height: 20.0),
-            _buildActionButton(),
+            const Text(
+              'Parece que no tienes órdenes pendientes en este momento. \nLas órdenes que realices aparecerán aquí.',
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 14.0, color: AppColors.grisLetras),
+            ),
           ],
         ),
       ),
     );
   }
+}
 
-  Widget _buildOrderDate(DateTime orderDate) {
-    return Align(
-      alignment: Alignment.topRight,
-      child: Text(
-        timeago.format(orderDate, locale: 'es'),
-        style: const TextStyle(fontSize: 14.0, color: Colors.grey),
+class OrderCard extends StatelessWidget {
+  final Map<String, dynamic> order;
+  final List<dynamic> products;
+
+  const OrderCard({Key? key, required this.order, required this.products})
+      : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    final DateTime orderDate =
+        DateTime.parse(order['createdAt'] ?? DateTime.now().toIso8601String());
+
+    final Map<String, Color> stateColors = {
+      'Pedido recibido': AppColors.naranjaAdvertencia,
+      'En camino': AppColors.verdeNavbar,
+      'Entregado': AppColors.azulClaro,
+    };
+
+    final Map<String, IconData> stateIcons = {
+      'Pedido recibido': Icons.new_releases,
+      'En camino': Icons.local_shipping,
+      'Entregado': Icons.check_circle,
+    };
+
+    final String state = order['state'];
+    final Color color = stateColors[state] ?? Colors.grey;
+    final IconData icon = stateIcons[state] ?? Icons.info;
+
+    return Card(
+      elevation: 3.0,
+      color: AppColors.blanco,
+      margin: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 16.0),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(15.0),
+      ),
+      child: ExpansionTile(
+        tilePadding:
+            const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+        childrenPadding:
+            const EdgeInsets.symmetric(vertical: 10.0, horizontal: 16.0),
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Primera fila: Pedido y fecha
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Text(
+                    'Cliente - ${order['userName']}',
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16.0,
+                      color: AppColors.verdeNavbar,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                Text(
+                  timeago.format(orderDate, locale: 'es'),
+                  style: const TextStyle(fontSize: 13.0, color: Colors.grey),
+                ),
+              ],
+            ),
+            const SizedBox(height: 4.0),
+            // Segunda fila: Barrio y Ciudad
+            Row(
+              children: [
+                const Icon(Icons.location_on,
+                    size: 18.0, color: AppColors.grisLetras),
+                const SizedBox(width: 4.0),
+                Expanded(
+                  child: Text(
+                    'Barrio: ${order['barrio']}',
+                    style: const TextStyle(
+                      fontSize: 14.0,
+                      color: AppColors.grisLetras,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 6.0),
+            // Tercera fila: Estado del pedido
+
+            Row(
+              children: [
+                const Icon(Icons.location_city,
+                    size: 18.0, color: AppColors.grisLetras),
+                const SizedBox(width: 4.0),
+                Expanded(
+                  child: Text(
+                    'Ciudad: ${order['ciudad']}',
+                    style: const TextStyle(
+                      fontSize: 14.0,
+                      color: AppColors.grisLetras,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
+            ),
+
+            const SizedBox(height: 6.0),
+
+            Row(
+              children: [
+                Icon(icon, color: color),
+                const SizedBox(width: 8.0),
+                Text(
+                  state,
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: color,
+                  ),
+                ),
+              ],
+            )
+          ],
+        ),
+        children: [
+          const Divider(),
+          _buildInfoSection(
+            context: context,
+            title: 'Información Personal',
+            rows: [
+              _buildInfoRow(Icons.person, 'Nombre', order['userName']),
+              _buildInfoRow(Icons.email, 'Gmail', order['gmail']),
+              _buildInfoRow(Icons.phone, 'Celular', order['celular']),
+            ],
+          ),
+          _buildInfoSection(
+            context: context,
+            title: 'Dirección de Entrega',
+            rows: [
+              _buildInfoRow(Icons.home, 'Dirección', order['direccion']),
+              _buildInfoRow(Icons.location_city, 'Barrio', order['barrio']),
+              _buildInfoRow(Icons.location_city, 'Ciudad', order['ciudad']),
+              _buildInfoRow(Icons.info, 'Detalles', order['detallesUbicacion']),
+            ],
+          ),
+          _buildProductsSection(products),
+          const SizedBox(height: 8.0),
+          _buildTotalAmount(),
+          _buildStateRow(),
+          const SizedBox(height: 10.0),
+        ],
       ),
     );
   }
 
-  Widget _buildOrderDetails() {
-    return Column(
+  Widget _buildInfoSection(
+      {required BuildContext context,
+      required String title,
+      required List<Widget> rows}) {
+    return _buildCard(
       children: [
-        _buildOrderDetail('Pedido ID:', order['documentId']),
-        _buildOrderDetail('Nombre:', order['userName']),
-        _buildOrderDetail('Barrio:', order['barrio']),
-        _buildOrderDetail('Dirección:', order['direccion']),
-        _buildOrderDetail('Ciudad:', order['ciudad']),
-        _buildOrderDetail('Detalles:', order['detallesUbicacion']),
+        Text(
+          title,
+          style: const TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 12.0),
+        ...rows,
       ],
     );
   }
 
-  Widget _buildOrderDetail(String label, dynamic value) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 6.0),
-      child: Row(
-        children: [
-          Text(
-            label,
-            style: const TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Text('$value'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildProductToggle() {
-    return Obx(
-      () => Row(
-        children: [
-          const Text(
-            'Productos:',
-            style: TextStyle(
-              fontSize: 18.0,
-              fontWeight: FontWeight.bold,
-              color: Colors.black87,
-            ),
-          ),
-          IconButton(
-            onPressed: () {
-              controller.showProducts.value = !controller.showProducts.value;
-            },
-            icon: controller.showProducts.value
-                ? const Icon(Icons.arrow_drop_up)
-                : const Icon(Icons.arrow_drop_down),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildProductList() {
-    return Obx(
-      () {
-        if (controller.showProducts.value) {
-          return Column(
-            children: _buildProductItems(products),
-          );
-        } else {
-          return Container();
-        }
-      },
-    );
-  }
-
-  List<Widget> _buildProductItems(List<dynamic> products) {
-    return products.map((product) {
-      final Map<String, dynamic> productData =
-          Map<String, dynamic>.from(product);
-      return Container(
-        margin: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 8.0),
-        decoration: BoxDecoration(
-          border: Border.all(color: Colors.grey[300]!),
-          borderRadius: BorderRadius.circular(8.0),
-          color: Colors.white,
-        ),
-        child: ListTile(
-          contentPadding:
-              const EdgeInsets.symmetric(vertical: 12.0, horizontal: 16.0),
-          leading:
-              const Icon(Icons.shopping_cart, color: AppColors.verdeNavbar),
-          title: Text(
-            productData['nombre'] ?? 'Producto Desconocido',
-            style: const TextStyle(fontSize: 16.0, fontWeight: FontWeight.w500),
-          ),
-          subtitle: RichText(
+  Widget _buildInfoRow(IconData icon, String label, String value) {
+    return Row(
+      children: [
+        Icon(icon, color: AppColors.verdeNavbar),
+        const SizedBox(width: 8.0),
+        Expanded(
+          child: RichText(
             text: TextSpan(
+              style: const TextStyle(color: Colors.black),
               children: [
                 TextSpan(
-                  text: 'Cantidad: ${productData['cantidad'] ?? 0}\n',
-                  style: const TextStyle(
-                      fontSize: 14.0, color: AppColors.grisLetras),
+                  text: '$label: ',
+                  style: const TextStyle(fontWeight: FontWeight.bold),
                 ),
-                TextSpan(
-                  text: 'Precio: \$ ${productData['precio'] ?? 0} COP\n',
-                  style: const TextStyle(
-                      fontSize: 14.0, color: AppColors.grisLetras),
-                ),
-                TextSpan(
-                  text: 'Promo: \$ ${productData['promo'] ?? 0} COP\n',
-                  style: const TextStyle(
-                      fontSize: 14.0, color: AppColors.grisLetras),
-                ),
-                TextSpan(
-                  text: 'Total: \$ ${productData['total'] ?? 0} COP',
-                  style: const TextStyle(
-                      fontSize: 15.0,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black),
-                ),
+                TextSpan(text: value),
               ],
             ),
           ),
         ),
-      );
-    }).toList();
+      ],
+    );
+  }
+
+  Widget _buildProductsSection(List<dynamic> products) {
+    final NumberFormat currencyFormat = NumberFormat.currency(
+      locale: 'es',
+      symbol: 'COP',
+      decimalDigits: 1,
+    );
+
+    return _buildCard(
+      children: [
+        const Text(
+          'Productos',
+          style: TextStyle(
+            fontSize: 20.0,
+            fontWeight: FontWeight.bold,
+            color: Colors.black87,
+          ),
+        ),
+        const SizedBox(height: 12.0),
+        products.isEmpty
+            ? const Center(child: Text('No hay productos en este pedido'))
+            : ListView.separated(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                separatorBuilder: (_, __) => const Divider(),
+                itemCount: products.length,
+                itemBuilder: (context, index) {
+                  final product = products[index];
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 8.0),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        CircleAvatar(
+                          radius: 25.0,
+                          backgroundColor: Colors.grey[200],
+                          backgroundImage: CachedNetworkImageProvider(
+                              product['imagen'] ?? ''),
+                        ),
+                        const SizedBox(width: 16.0),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                product['nombre'],
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16.0,
+                                ),
+                              ),
+                              Text(
+                                'Cantidad: X${product['cantidad']}',
+                                style: const TextStyle(color: Colors.grey),
+                              ),
+                              if (product['promo'] != 0.0)
+                                Text(
+                                  'Promo: ${currencyFormat.format(product['promo'])}',
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.green,
+                                  ),
+                                ),
+                              Text(
+                                'Precio: ${currencyFormat.format(product['precio'])}',
+                                style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    color: AppColors.grisLetras),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              ),
+      ],
+    );
+  }
+
+  Widget _buildCard({required List<Widget> children}) {
+    return Card(
+      color: AppColors.blanco,
+      elevation: 4.0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(15.0),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(10.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: children,
+        ),
+      ),
+    );
   }
 
   Widget _buildTotalAmount() {
+    final NumberFormat currencyFormat = NumberFormat.currency(
+      locale: 'es',
+      symbol: 'COP',
+      decimalDigits: 1,
+    );
+
     return Text(
-      'Total: \$${order['totalSum']} COP',
+      'Total: ${currencyFormat.format(order['totalSum'])}',
       style: const TextStyle(
           fontSize: 18.0, fontWeight: FontWeight.bold, color: Colors.green),
     );
@@ -274,72 +389,33 @@ class OrderCard extends StatelessWidget {
 
   Widget _buildStateRow() {
     final Map<String, Color> stateColors = {
-      'Pedido recibido': AppColors.rojoError,
-      'Preparando pedido': AppColors.naranjaAdvertencia,
+      'Pedido recibido': AppColors.naranjaAdvertencia,
       'En camino': AppColors.verdeNavbar,
       'Entregado': AppColors.azulClaro,
     };
 
-    Color stateColor = stateColors[order['state']] ?? Colors.grey;
+    final Map<String, IconData> stateIcons = {
+      'Pedido recibido': Icons.new_releases,
+      'En camino': Icons.local_shipping,
+      'Entregado': Icons.check_circle,
+    };
+
+    final String state = order['state'];
+    final Color color = stateColors[state] ?? Colors.grey;
+    final IconData icon = stateIcons[state] ?? Icons.info;
 
     return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
+        Icon(icon, color: color),
+        const SizedBox(width: 8.0),
         Text(
-          'Estado:',
-          style: TextStyle(fontSize: 16.0, color: Colors.grey[700]),
-        ),
-        Row(
-          children: [
-            Container(
-              height: 20,
-              width: 20,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(15),
-                color: stateColor,
-              ),
-            ),
-            const SizedBox(width: 5),
-            Text(
-              '${order['state']}',
-              style: TextStyle(
-                  fontSize: 16.0,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.grey[800]),
-            ),
-          ],
+          state,
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            color: color,
+          ),
         ),
       ],
     );
-  }
-
-  Widget _buildActionButton() {
-    return order['state'] == 'Entregado'
-        ? Center(
-            child: ElevatedButton(
-              onPressed: () {
-                controller.sendDataToHistory(order['documentId'], order);
-              },
-              style: ElevatedButton.styleFrom(
-                foregroundColor: Colors.white,
-                backgroundColor: AppColors.verdeNavbar,
-                padding: const EdgeInsets.symmetric(
-                    vertical: 14.0, horizontal: 20.0),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12.0),
-                ),
-                elevation: 5,
-              ),
-              child: const Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(Icons.history, size: 20.0),
-                  SizedBox(width: 8.0),
-                  Text('Enviar al historial'),
-                ],
-              ),
-            ),
-          )
-        : Container();
   }
 }

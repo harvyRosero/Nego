@@ -9,7 +9,6 @@ class OrdersController extends GetxController {
   RxList<Map<dynamic, dynamic>> ordersList = <Map<dynamic, dynamic>>[].obs;
   late SharedPreferences _prefs;
   late String _userId;
-  var showProducts = false.obs;
 
   @override
   void onInit() {

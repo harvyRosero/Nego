@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:agro/controllers/home/shopping_cart_controller.dart';
 import 'package:get/get.dart';
 import 'package:agro/models/selected_product_model.dart';
+import 'package:intl/intl.dart';
 
 class ShoppingCartScreen extends StatelessWidget {
   ShoppingCartScreen({super.key});
@@ -15,11 +16,26 @@ class ShoppingCartScreen extends StatelessWidget {
       appBar: AppBar(
         title: const Text("Carrito de compras"),
         leading: IconButton(
+          onPressed: () {
+            Get.back();
+            _controller.updateCartItemCount();
+          },
+          icon: const Icon(Icons.arrow_back_ios),
+        ),
+        actions: [
+          IconButton(
             onPressed: () {
-              Get.back();
-              _controller.updateCartItemCount();
+              _controller.loadCartProducts();
             },
-            icon: const Icon(Icons.arrow_back_ios)),
+            icon: const Icon(
+              Icons.refresh,
+              size: 35,
+            ),
+          ),
+          const SizedBox(
+            width: 10,
+          )
+        ],
       ),
       body: Column(
         children: [
@@ -34,12 +50,27 @@ class ShoppingCartScreen extends StatelessWidget {
                 );
               }
 
-              return ListView.builder(
-                itemCount: _controller.cartProducts.length,
-                itemBuilder: (context, index) {
-                  final product = _controller.cartProducts[index];
-                  return _buildCartItem(product, context);
-                },
+              // Añadimos el RefreshIndicator aquí
+              return RefreshIndicator(
+                color: AppColors.verdeNavbar,
+                onRefresh: _controller.loadCartProducts,
+                child: ListView.builder(
+                  itemCount: _controller.cartProducts.length,
+                  itemBuilder: (context, index) {
+                    final product = _controller.cartProducts[index];
+                    return GestureDetector(
+                      onTap: () {
+                        Get.toNamed(
+                          AppRoutes.detailProduct,
+                          arguments: {
+                            'pId': product.pId,
+                          },
+                        );
+                      },
+                      child: _buildCartItem(product, context),
+                    );
+                  },
+                ),
               );
             }),
           ),
@@ -50,6 +81,12 @@ class ShoppingCartScreen extends StatelessWidget {
   }
 
   Widget _buildCartItem(SelectedProductData product, BuildContext context) {
+    final NumberFormat currencyFormat = NumberFormat.currency(
+      locale: 'es',
+      symbol: 'COP',
+      decimalDigits: 1,
+    );
+
     return Card(
       color: AppColors.blanco,
       margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
@@ -85,21 +122,22 @@ class ShoppingCartScreen extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              '\$ ${product.promo.toStringAsFixed(2)} COP',
+                              currencyFormat.format(product.promo),
                               style:
                                   const TextStyle(color: AppColors.verdeLetras),
                             ),
                             Text(
-                              '\$ ${product.precio.toStringAsFixed(2)} COP',
+                              currencyFormat.format(product.precio),
                               style: const TextStyle(
-                                  color: Colors.red,
-                                  fontSize: 11,
-                                  decoration: TextDecoration.lineThrough),
+                                color: Colors.red,
+                                fontSize: 11,
+                                decoration: TextDecoration.lineThrough,
+                              ),
                             ),
                           ],
                         )
                       : Text(
-                          '\$ ${product.precio.toStringAsFixed(2)} COP',
+                          currencyFormat.format(product.precio),
                           style: const TextStyle(color: AppColors.gris),
                         ),
                 ],
@@ -109,10 +147,8 @@ class ShoppingCartScreen extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 Text(
-                  '\$ ${product.total.toStringAsFixed(2)}',
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                  ),
+                  currencyFormat.format(product.total),
+                  style: const TextStyle(fontWeight: FontWeight.bold),
                 ),
                 IconButton(
                   icon: const Icon(Icons.delete, color: Colors.red),
@@ -129,6 +165,12 @@ class ShoppingCartScreen extends StatelessWidget {
   }
 
   Widget _buildTotalAndCheckoutButton(BuildContext context) {
+    final NumberFormat currencyFormat = NumberFormat.currency(
+      locale: 'es',
+      symbol: 'COP',
+      decimalDigits: 1,
+    );
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 5),
       child: Row(
@@ -136,18 +178,20 @@ class ShoppingCartScreen extends StatelessWidget {
           Obx(() {
             return Expanded(
               child: Text(
-                'Total: \$ ${_controller.totalSum.value.toStringAsFixed(2)} COP',
+                currencyFormat.format(_controller.totalSum.value),
                 style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold, color: AppColors.verdeNavbar),
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.verdeNavbar,
+                    ),
               ),
             );
           }),
           const SizedBox(width: 16),
           ElevatedButton(
             onPressed: () {
-              _controller.totalSum.value == 0
-                  ? () {}
-                  : Get.toNamed(AppRoutes.billing);
+              if (_controller.totalSum.value != 0) {
+                Get.toNamed(AppRoutes.billing);
+              }
             },
             style: ElevatedButton.styleFrom(
               padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 25),
@@ -157,7 +201,7 @@ class ShoppingCartScreen extends StatelessWidget {
               ),
             ),
             child: const Text(
-              'Pagar',
+              'Facturar',
               style: TextStyle(
                 fontSize: 16,
                 color: Colors.white,

@@ -91,6 +91,7 @@ class BillingController extends GetxController {
       detallesUbicacion: detallesUbicacion.value,
       barrio: barrio.value,
       state: 'Pedido recibido',
+      deliveryId: '',
       totalSum: totalSum.value,
       products: cartProducts.toList(),
       createdAt: DateTime.now().toIso8601String(),

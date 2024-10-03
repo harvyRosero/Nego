@@ -4,349 +4,460 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:agro/utils/app_colors.dart';
 import 'package:agro/controllers/home/product_detail_controller.dart';
 import 'package:agro/models/selected_product_model.dart';
+import 'package:intl/intl.dart';
 
 class DetailProductWidget extends StatelessWidget {
   DetailProductWidget({super.key});
-  final ProductDetailController productDetailController =
-      Get.put(ProductDetailController());
+  final ProductDetailController controller = Get.put(ProductDetailController());
 
   @override
   Widget build(BuildContext context) {
     final arguments = Get.arguments;
     if (arguments == null || arguments is! Map<String, dynamic>) {
-      return Scaffold(
-        appBar: AppBar(
-          title: const Text("Detalles del Producto"),
-          leading: IconButton(
-            icon: const Icon(
-                Icons.arrow_back_ios), // Cambia este icono por el que prefieras
-            onPressed: () {
-              Get.back();
-            },
-          ),
-        ),
-        body: Center(
-          child: Text(
-            'No se proporcionaron detalles del producto.',
-            style: Theme.of(context).textTheme.titleLarge,
-          ),
-        ),
-      );
+      return _buildEmptyState(context);
     }
 
-    final String name = arguments['name'] ?? '';
-    final String companyName = arguments['companyName'] ?? '';
-    final String description = arguments['description'] ?? '';
-    final int stock = arguments['stock'] ?? 0;
-    final double rating = arguments['rating']?.toDouble() ?? 0.0;
-    final String category = arguments['category'] ?? '';
-    final double price = arguments['price']?.toDouble() ?? 0.0;
-    final double promo = arguments['promo']?.toDouble() ?? 0.0;
-    final String img = arguments['img'] ?? '';
+    controller.getArguments(arguments);
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Detalles del Producto"),
+        title: Text(
+          "Detalles del Producto",
+          style: GoogleFonts.montserrat(fontWeight: FontWeight.w600),
+        ),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios),
+          onPressed: () {
+            Get.back();
+          },
+        ),
+        elevation: 0,
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Container(
-              decoration: const BoxDecoration(color: AppColors.grisClaro),
-              child: Padding(
-                padding: const EdgeInsets.all(10.0),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _buildProductImage(img),
-                    const SizedBox(height: 16.0),
-                    _buildProductDetails(
-                        name, description, companyName, context),
-                  ],
-                ),
-              ),
-            ),
+            _buildProductImage(),
             const SizedBox(height: 16.0),
-            _buildStockAndCategory(stock, category, context),
+            _buildProductDetails(context),
             const SizedBox(height: 16.0),
-            _buildRating(rating),
+            _buildStockAndCategory(context),
+            const SizedBox(height: 16.0),
+            _buildRating(),
             const SizedBox(height: 8.0),
-            _buildPrice(price, context, promo),
+            _buildPrice(context),
             const SizedBox(height: 16.0),
-            _buildQuantitySelector(context, price, promo),
-            _buildAddToCartButton(context, arguments),
+            _buildQuantitySelector(context),
+            const SizedBox(height: 16.0),
+            _buildAddToCartButton(context),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildProductImage(String img) {
-    return Center(
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(10.0),
-        child: Image.network(
-          img,
-          height: 200.0,
-          width: double.infinity,
-          fit: BoxFit.cover,
+  Widget _buildEmptyState(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text("Detalles del Producto"),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios),
+          onPressed: () {
+            Get.back();
+          },
+        ),
+      ),
+      body: Center(
+        child: Text(
+          'No se proporcionaron detalles del producto.',
+          style: Theme.of(context).textTheme.titleLarge,
         ),
       ),
     );
   }
 
-  Widget _buildProductDetails(String name, String description,
-      String companyName, BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          name,
-          style: GoogleFonts.montserrat(
-            color: AppColors.verdeLetras,
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
+  Widget _buildProductImage() {
+    return Obx(() {
+      return Center(
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(10.0),
+          child: Image.network(
+            controller.img.value,
+            height: 250.0,
+            width: double.infinity,
+            fit: BoxFit.cover,
+            loadingBuilder: (context, child, loadingProgress) {
+              if (loadingProgress == null) return child;
+              return const Center(child: CircularProgressIndicator());
+            },
+            errorBuilder: (context, error, stackTrace) {
+              return const LinearProgressIndicator(
+                color: AppColors.verdeNavbar,
+              );
+            },
           ),
         ),
-        const SizedBox(height: 8.0),
-        Text(
-          description,
-          style: const TextStyle(
-            fontWeight: FontWeight.w400,
-            color: AppColors.grisLetras,
-            fontSize: 15,
-          ),
-        ),
-        const SizedBox(height: 12.0),
-        Text(
-          'Por: $companyName',
-          style: Theme.of(context)
-              .textTheme
-              .titleMedium
-              ?.copyWith(color: Colors.grey[600]),
-        ),
-      ],
-    );
+      );
+    });
   }
 
-  Widget _buildStockAndCategory(
-      int stock, String category, BuildContext context) {
-    return Row(
-      children: [
-        Expanded(
-          child: Text(
-            'Stock: $stock',
-            style: Theme.of(context)
-                .textTheme
-                .bodyLarge
-                ?.copyWith(color: Colors.green[700]),
+  Widget _buildProductDetails(BuildContext context) {
+    return Obx(() {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            controller.name.value,
+            style: GoogleFonts.montserrat(
+              color: AppColors.verdeLetras,
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+            ),
           ),
-        ),
-        Expanded(
-          child: Text(
-            'Categoría: $category',
+          const SizedBox(height: 8.0),
+          Text(
+            controller.description.value,
+            style: const TextStyle(
+              fontWeight: FontWeight.w400,
+              color: AppColors.grisLetras,
+              fontSize: 15,
+              height: 1.5,
+            ),
+          ),
+          const SizedBox(height: 12.0),
+          Text(
+            'Sugerencias',
             style: Theme.of(context)
                 .textTheme
-                .bodyLarge
+                .titleMedium
                 ?.copyWith(color: Colors.grey[600]),
           ),
-        ),
-      ],
-    );
+          _buildSuggestedProducts()
+        ],
+      );
+    });
   }
 
-  Widget _buildRating(double rating) {
-    return Row(
-      children: List.generate(5, (index) {
-        return Icon(
-          Icons.star,
-          color: index < rating ? Colors.amber : Colors.grey[400],
-          size: 20.0,
-        );
-      }),
+  Widget _buildSuggestedProducts() {
+    final NumberFormat currencyFormat = NumberFormat.currency(
+      locale: 'es',
+      symbol: 'COP',
+      decimalDigits: 2,
     );
+
+    return Obx(() {
+      if (controller.productsSug.isEmpty) {
+        return const Center(child: CircularProgressIndicator());
+      }
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const SizedBox(height: 12.0),
+          SizedBox(
+            height: 160,
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              itemCount: controller.productsSug.length,
+              itemBuilder: (context, index) {
+                var producto = controller.productsSug[index];
+                return GestureDetector(
+                  onTap: () {
+                    controller.fetchProductById(producto['id']);
+                    controller.quantity.value = 1;
+                    controller.totalValue.value = producto['promo'] == 0.0
+                        ? producto['price']
+                        : producto['promo'];
+                  },
+                  child: Container(
+                    width: 120,
+                    margin: const EdgeInsets.only(right: 8.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(8.0),
+                          child: Image.network(
+                            producto['imageUrl'] ?? '',
+                            height: 100,
+                            width: 90,
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) {
+                              return const Icon(
+                                Icons.error,
+                                color: Colors.red,
+                                size: 50,
+                              );
+                            },
+                          ),
+                        ),
+                        const SizedBox(height: 6.0),
+                        Text(
+                          producto['name'] ?? 'Nombre del producto',
+                          style: GoogleFonts.montserrat(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 1,
+                        ),
+                        const SizedBox(height: 4.0),
+                        Text(
+                          currencyFormat.format(producto['price']),
+                          style: GoogleFonts.montserrat(
+                            fontSize: 12,
+                            color: Colors.grey[600],
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 1,
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
+      );
+    });
   }
 
-  Widget _buildPrice(double price, BuildContext context, double promo) {
-    return promo > 0
-        ? Column(
+  Widget _buildStockAndCategory(BuildContext context) {
+    return Obx(() {
+      return Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Chip(
+            label: Text(
+              'Stock: ${controller.stock.value}',
+              style: TextStyle(
+                color: controller.stock.value > 0
+                    ? AppColors.verdeNavbar
+                    : Colors.red,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            backgroundColor: Colors.grey[200],
+          ),
+          Chip(
+            label: Text(
+              'Categoría: ${controller.category.value}',
+              style: Theme.of(context)
+                  .textTheme
+                  .bodyMedium
+                  ?.copyWith(color: Colors.grey[700]),
+            ),
+            backgroundColor: Colors.grey[200],
+          ),
+        ],
+      );
+    });
+  }
+
+  Widget _buildRating() {
+    return Obx(() {
+      return Row(
+        children: List.generate(5, (index) {
+          return Icon(
+            Icons.star,
+            color: index < controller.rating.value
+                ? Colors.amber
+                : Colors.grey[400],
+            size: 20.0,
+          );
+        }),
+      );
+    });
+  }
+
+  Widget _buildPrice(BuildContext contxt) {
+    final NumberFormat currencyFormat = NumberFormat.currency(
+      locale: 'es',
+      symbol: 'COP',
+      decimalDigits: 2,
+    );
+
+    return Obx(() {
+      return controller.promo.value > 0
+          ? Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  currencyFormat.format(controller.promo.value),
+                  style: GoogleFonts.montserrat(
+                    fontSize: 22,
+                    color: AppColors.verdeNavbar,
+                  ),
+                ),
+                Text(
+                  currencyFormat.format(controller.price.value),
+                  style: GoogleFonts.montserrat(
+                    fontSize: 16,
+                    color: AppColors.rojoError,
+                    decoration: TextDecoration.lineThrough,
+                  ),
+                ),
+              ],
+            )
+          : Text(
+              currencyFormat.format(controller.price.value),
+              style: GoogleFonts.montserrat(
+                fontSize: 22,
+                color: AppColors.verdeNavbar,
+              ),
+            );
+    });
+  }
+
+  Widget _buildQuantitySelector(BuildContext context) {
+    final NumberFormat currencyFormat = NumberFormat.currency(
+      locale: 'es',
+      symbol: 'COP',
+      decimalDigits: 1,
+    );
+
+    return Obx(() {
+      double price0 = controller.promo.value > 0
+          ? controller.promo.value
+          : controller.price.value;
+
+      return Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                '\$ ${promo.toStringAsFixed(2)}',
+                "Cantidad",
                 style: Theme.of(context)
                     .textTheme
-                    .headlineSmall
-                    ?.copyWith(color: Colors.green[700]),
+                    .bodyLarge
+                    ?.copyWith(color: Colors.grey[600]),
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.remove),
+                    onPressed: () {
+                      if (controller.quantity.value > 1) {
+                        controller.quantity.value--;
+                        controller.totalValue.value =
+                            price0 * controller.quantity.value;
+                      }
+                    },
+                  ),
+                  Text(
+                    controller.quantity.value.toString(),
+                    style: GoogleFonts.montserrat(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.add),
+                    onPressed: () {
+                      controller.quantity.value++;
+                      controller.totalValue.value =
+                          price0 * controller.quantity.value;
+                    },
+                  ),
+                ],
+              ),
+            ],
+          ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text(
+                "Total",
+                style: Theme.of(context)
+                    .textTheme
+                    .bodyLarge
+                    ?.copyWith(color: Colors.grey[600]),
               ),
               Text(
-                '\$ ${price.toStringAsFixed(2)}',
-                style: Theme.of(context)
-                    .textTheme
-                    .headlineSmall
-                    ?.copyWith(color: Colors.red[700], fontSize: 14),
-              )
-            ],
-          )
-        : Text(
-            '\$ ${price.toStringAsFixed(2)}',
-            style: Theme.of(context)
-                .textTheme
-                .headlineSmall
-                ?.copyWith(color: Colors.green[700]),
-          );
-  }
-
-  Widget _buildQuantitySelector(
-      BuildContext context, double price, double promo) {
-    if (promo > 0) {
-      price = promo;
-    }
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              "Cantidad",
-              style: Theme.of(context)
-                  .textTheme
-                  .bodyLarge
-                  ?.copyWith(color: Colors.grey[600]),
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                IconButton(
-                  icon: const Icon(Icons.remove),
-                  onPressed: () {
-                    if (productDetailController.quantity.value > 1) {
-                      productDetailController.quantity.value--;
-                      productDetailController.totalValue.value =
-                          price * productDetailController.quantity.value;
-                    }
-                  },
+                controller.totalValue.value.isEqual(0.0)
+                    ? currencyFormat.format(price0)
+                    : currencyFormat.format(controller.totalValue.value),
+                style: GoogleFonts.montserrat(
+                  fontSize: 18,
+                  color: AppColors.verdeNavbar,
                 ),
-                Obx(() => Text(
-                      productDetailController.quantity.value.toString(),
-                      style: Theme.of(context).textTheme.headlineSmall,
-                    )),
-                IconButton(
-                  icon: const Icon(Icons.add),
-                  onPressed: () {
-                    productDetailController.quantity.value++;
-                    productDetailController.totalValue.value =
-                        price * productDetailController.quantity.value;
-                  },
-                ),
-              ],
-            ),
-          ],
-        ),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: [
-            Text(
-              "Total",
-              style: Theme.of(context)
-                  .textTheme
-                  .bodyLarge
-                  ?.copyWith(color: Colors.grey[600]),
-            ),
-            Obx(
-              () => Text(
-                productDetailController.totalValue.value.isEqual(0.0)
-                    ? price.toStringAsFixed(2)
-                    : '\$ ${productDetailController.totalValue.value.toStringAsFixed(2)}',
-                style: Theme.of(context)
-                    .textTheme
-                    .headlineSmall
-                    ?.copyWith(color: Colors.green[700]),
               ),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-
-  Widget _buildAddToCartButton(
-      BuildContext context, Map<String, dynamic> arguments) {
-    return Container(
-      width: double.infinity,
-      margin: const EdgeInsets.symmetric(vertical: 8.0),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(10.0),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.2),
-            spreadRadius: 1,
-            blurRadius: 5,
-            offset: const Offset(0, 3),
+            ],
           ),
         ],
-      ),
-      child: ElevatedButton(
-        onPressed: () async {
-          if (arguments['estado'] == 'Agotado') {
-            Get.snackbar('Info',
-                'Este producto está agotado, por favor actualiza los productos e intenta más tarde');
-            return;
-          }
+      );
+    });
+  }
 
-          double price = (arguments['price'] as num?)?.toDouble() ?? 0.0;
-          double price2 = (arguments['price'] as num?)?.toDouble() ?? 0.0;
-          final double promo = (arguments['promo'] as num?)?.toDouble() ?? 0.0;
-          if (promo > 0) {
-            price = promo;
-          }
+  Widget _buildAddToCartButton(BuildContext context) {
+    return Obx(() {
+      return Container(
+        width: double.infinity,
+        margin: const EdgeInsets.symmetric(vertical: 12.0),
+        child: controller.isLoading.value
+            ? const LinearProgressIndicator(color: AppColors.verdeNavbar)
+            : ElevatedButton.icon(
+                onPressed: () async {
+                  if (controller.estado.value == 'Agotado') {
+                    Get.snackbar(
+                      'Info',
+                      'Este producto está agotado, por favor actualiza los productos e intenta más tarde',
+                      backgroundColor: Colors.red.withOpacity(0.7),
+                      colorText: Colors.white,
+                    );
+                    return;
+                  }
+                  double price0 =
+                      (controller.price.value as num?)?.toDouble() ?? 0.0;
+                  double price =
+                      (controller.price.value as num?)?.toDouble() ?? 0.0;
+                  final double promo =
+                      (controller.promo.value as num?)?.toDouble() ?? 0.0;
+                  if (promo > 0) {
+                    price = promo;
+                  }
 
-          final product = SelectedProductData(
-            pId: arguments['pId'] ?? '',
-            nombre: arguments['name'] ?? '',
-            precio: price2,
-            promo: promo,
-            imagen: arguments['img'] ?? '',
-            total: productDetailController.quantity.value == 1
-                ? price
-                : productDetailController.totalValue.value,
-            cantidad: productDetailController.quantity.value,
-          );
+                  final product = SelectedProductData(
+                    pId: controller.pId.value,
+                    nombre: controller.name.value,
+                    precio: price0,
+                    promo: promo,
+                    imagen: controller.img.value,
+                    total: controller.quantity.value == 1
+                        ? price
+                        : controller.totalValue.value,
+                    cantidad: controller.quantity.value,
+                  );
 
-          productDetailController.addToCart(product);
-          Get.back();
-        },
-        style: ElevatedButton.styleFrom(
-          backgroundColor: arguments['estado'] == 'Agotado'
-              ? AppColors.gris
-              : AppColors.verdeNavbar,
-          foregroundColor: AppColors.blanco,
-          padding: const EdgeInsets.symmetric(vertical: 16.0),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10.0),
-          ),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(Icons.add_shopping_cart, size: 20),
-            const SizedBox(width: 8.0),
-            Text(
-              arguments['estado'] == 'Agotado'
-                  ? "Producto Agotado"
-                  : "Agregar al carrito",
-              style: GoogleFonts.montserrat(
-                fontSize: 16.0,
-                fontWeight: FontWeight.bold,
+                  controller.addToCart(product);
+                  Get.back();
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: controller.estado.value == 'Agotado'
+                      ? AppColors.gris
+                      : AppColors.verdeNavbar,
+                  foregroundColor: AppColors.blanco,
+                  padding: const EdgeInsets.symmetric(vertical: 16.0),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10.0),
+                  ),
+                ),
+                icon: const Icon(Icons.add_shopping_cart, size: 20),
+                label: Text(
+                  controller.estado.value == 'Agotado'
+                      ? "Producto Agotado"
+                      : "Agregar al carrito",
+                  style: GoogleFonts.montserrat(
+                    fontSize: 16.0,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
               ),
-            ),
-          ],
-        ),
-      ),
-    );
+      );
+    });
   }
 }

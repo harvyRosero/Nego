@@ -81,8 +81,10 @@ class PushNotificationsProvider {
   Future<void> _saveNotificationLocally(String title, String body) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     List<String> notifications = prefs.getStringList('notifications') ?? [];
+    final orderDate = DateTime.now().toIso8601String();
 
-    String newNotification = '{"title": "$title", "body": "$body"}';
+    String newNotification =
+        '{"title": "$title", "body": "$body", "date": "$orderDate"}';
     notifications.add(newNotification);
 
     await prefs.setStringList('notifications', notifications);

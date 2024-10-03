@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:agro/controllers/billing_controller.dart';
 import 'package:agro/routes/app_routes.dart';
 import 'package:agro/utils/app_colors.dart';
+import 'package:intl/intl.dart';
 
 class BillingScreen extends StatelessWidget {
   BillingScreen({super.key});
@@ -10,6 +11,12 @@ class BillingScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final NumberFormat currencyFormat = NumberFormat.currency(
+      locale: 'es',
+      symbol: 'COP',
+      decimalDigits: 2,
+    );
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Facturación'),
@@ -91,14 +98,14 @@ class BillingScreen extends StatelessWidget {
                     children: billingController.cartProducts.map((product) {
                       return _buildOrderDetailRow(
                         '${product.nombre} (x${product.cantidad})',
-                        '\$ ${product.total.toStringAsFixed(2)}',
+                        currencyFormat.format(product.total),
                       );
                     }).toList(),
                   )),
               const Divider(height: 32),
               Obx(() => _buildOrderDetailRow(
                     'Total',
-                    '\$ ${billingController.totalSum.value.toStringAsFixed(2)}',
+                    currencyFormat.format(billingController.totalSum.value),
                     isTotal: true,
                   )),
               const SizedBox(height: 24),

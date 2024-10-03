@@ -13,6 +13,7 @@ class MyOrder {
   final String detallesUbicacion;
   final String barrio;
   final String state;
+  final String deliveryId;
   final double totalSum;
   final List<SelectedProductData> products;
   final String createdAt;
@@ -29,6 +30,7 @@ class MyOrder {
     required this.detallesUbicacion,
     required this.barrio,
     required this.state,
+    required this.deliveryId,
     required this.totalSum,
     required this.products,
     required this.createdAt,
@@ -48,6 +50,7 @@ class MyOrder {
       'barrio': barrio,
       'totalSum': totalSum,
       'state': state,
+      'deliveryId': deliveryId,
       'products': products.map((product) => product.toMap()).toList(),
       'createdAt': createdAt,
     };
@@ -66,6 +69,7 @@ class MyOrder {
       detallesUbicacion: map['detallesUbicacion'] ?? '',
       barrio: map['barrio'] ?? '',
       state: map['state'] ?? '',
+      deliveryId: map['deliveryId'] ?? '',
       totalSum: map['totalSum']?.toDouble() ?? 0.0,
       products: List<SelectedProductData>.from(
           map['products']?.map((x) => SelectedProductData.fromMap(x))),

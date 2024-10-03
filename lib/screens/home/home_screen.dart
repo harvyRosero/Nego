@@ -63,8 +63,8 @@ class HomeScreen extends StatelessWidget {
   Widget _buildBottomNavigationBar() {
     return homeController.isBottomNavVisible.value
         ? BottomNavigationBar(
-            backgroundColor: Colors.blueGrey,
             currentIndex: _getCurrentTabIndex(),
+            backgroundColor: AppColors.blanco,
             selectedItemColor: AppColors.verdeNavbar,
             unselectedItemColor: AppColors.gris,
             onTap: _onBottomNavTap,

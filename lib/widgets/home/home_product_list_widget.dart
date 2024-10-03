@@ -1,3 +1,4 @@
+import 'package:agro/routes/app_routes.dart';
 import 'package:agro/utils/app_colors.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
@@ -24,38 +25,46 @@ class HomeProductListWidget extends StatelessWidget {
           onScroll(scrollInfo);
           return false;
         },
-        child: CustomScrollView(
-          physics: const BouncingScrollPhysics(),
-          slivers: [
-            buildSliverAppBar(),
-            SliverToBoxAdapter(
-              child: _buildCarousel(),
-            ),
-            PagedSliverGrid<int, ProductData>(
-              pagingController: homeProductListController.pagingController,
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                mainAxisSpacing: 10,
-                crossAxisSpacing: 10,
-                childAspectRatio: 0.75,
+        child: RefreshIndicator(
+          onRefresh: () async {
+            // Refresca tanto los productos como la publicidad
+            await homeProductListController.refreshData();
+          },
+          child: CustomScrollView(
+            physics: const BouncingScrollPhysics(),
+            slivers: [
+              buildSliverAppBar(),
+              SliverToBoxAdapter(
+                child: _buildCarousel(),
               ),
-              builderDelegate: PagedChildBuilderDelegate<ProductData>(
-                itemBuilder: (context, product, index) => ProductCard(
-                  productId: product.id,
-                  productName: product.name,
-                  productCompanyName: 'Nego',
-                  productPrice: product.price,
-                  productPromo: product.promo,
-                  productImage: product.imageUrl,
-                  productDescription: product.description,
-                  productRating: product.rating,
-                  category: product.category,
-                  estado: product.estado,
-                  stock: product.stock,
+              PagedSliverGrid<int, ProductData>(
+                pagingController: homeProductListController.pagingController,
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  mainAxisSpacing: 7,
+                  crossAxisSpacing: 1,
+                  childAspectRatio: 0.65,
+                ),
+                builderDelegate: PagedChildBuilderDelegate<ProductData>(
+                  itemBuilder: (context, product, index) => ProductCard(
+                    productId: product.id,
+                    productName: product.name,
+                    productCompanyName: 'Nego',
+                    productPrice: product.price,
+                    productPromo: product.promo,
+                    productImage: product.imageUrl,
+                    productDescription: product.description,
+                    productRating: product.rating,
+                    category: product.category,
+                    estado: product.estado,
+                    stock: product.stock,
+                  ),
+                  noItemsFoundIndicatorBuilder: (context) =>
+                      _buildNoItemsFound(homeProductListController),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       );
     });
@@ -94,6 +103,75 @@ class HomeProductListWidget extends StatelessWidget {
             },
           );
         }).toList(),
+      ),
+    );
+  }
+
+  Widget _buildNoItemsFound(
+      HomeProductListController homeProductListController) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 20.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.location_off,
+              size: 50,
+              color:
+                  AppColors.verdeNavbar.withOpacity(0.6), // Color consistente
+            ),
+            const SizedBox(height: 20),
+            const Text(
+              'Ubicación no encontrada.\nConfigura tu ubicación para ver productos.',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.grey,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            const SizedBox(height: 30),
+            ElevatedButton.icon(
+              onPressed: () {
+                Get.toNamed(
+                  AppRoutes.configAddress,
+                  arguments: {
+                    'barrio': '',
+                    'direccion': '',
+                    'detallesDireccion': '',
+                    'celular': '',
+                  },
+                );
+              },
+              icon: const Icon(Icons.add_location_alt, color: Colors.white),
+              label: const Text('Agregar ubicación'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.verdeNavbar,
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                elevation: 2,
+              ),
+            ),
+            const SizedBox(height: 15),
+            TextButton(
+              onPressed: () {
+                homeProductListController.pagingController.refresh();
+              },
+              child: const Text(
+                'Refrescar',
+                style: TextStyle(
+                  fontSize: 16,
+                  color: AppColors.verdeNavbar,
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
