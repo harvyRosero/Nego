@@ -167,7 +167,11 @@ class SearchScreen extends StatelessWidget {
               onTap: () {
                 Get.toNamed(
                   AppRoutes.detailProduct,
-                  arguments: {'pId': product.id, 'category': product.category},
+                  arguments: {
+                    'pId': product.id,
+                    'category': product.category,
+                    'flag': 'false',
+                  },
                 );
               },
             ),

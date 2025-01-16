@@ -85,10 +85,13 @@ class HomeProductListController extends GetxController {
   }
 
   Future<void> fetchPublicidadData() async {
+    String city = await getUbicationData();
+    String colleccion = 'Publicidad$city';
+
     try {
       final docSnapshot = await FirebaseFirestore.instance
           .collection('DataApp')
-          .doc('publicidad')
+          .doc(colleccion)
           .get();
 
       if (docSnapshot.exists) {
@@ -97,6 +100,9 @@ class HomeProductListController extends GetxController {
         publicidadImages.value = data.values.whereType<String>().toList();
       } else {
         SnackbarUtils.info('El documento de publicidad no existe');
+        publicidadImages.value = [
+          'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTghpUSAfKgYdJttzmFlEmtltJjeXkAjKl_Hw&s'
+        ];
       }
     } catch (e) {
       SnackbarUtils.info(

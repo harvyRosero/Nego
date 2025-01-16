@@ -72,7 +72,6 @@ class CreateAccountController extends GetxController {
     if (validatePassword(passwordController.text) &&
         validateEmail(gmailController.text) &&
         userNameController.text.isNotEmpty) {
-      // Pasa la función _sendDataToFirebase como argumento
       await _showTermsAndConditionsDialog(_sendDataToFirebase);
     } else {
       SnackbarUtils.info("¡Debes llenar todos los campos!");
@@ -86,45 +85,113 @@ class CreateAccountController extends GetxController {
 
   Future<void> _showTermsAndConditionsDialog(
       Future<void> Function() onAccept) async {
-    await _fetchData();
     return Get.dialog(
-      AlertDialog(
-        title: const Text(
-          'Términos y Condiciones',
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+      Dialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(15),
         ),
-        content: SingleChildScrollView(
-          child: Obx(() {
-            return Text(
-              termsAndConditions.value.replaceAll('\n\n', ' '),
-              style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w300),
-            );
-          }),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Get.back();
-              isLoadingButton.value = false;
-            },
-            child: const Text('Cancelar'),
+        child: Container(
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(15),
+            color: Colors.white,
           ),
-          ElevatedButton(
-            onPressed: () async {
-              Get.back();
-              // Llama a la función pasada como argumento
-              await onAccept();
-            },
-            style: ElevatedButton.styleFrom(
-              foregroundColor: AppColors.blanco,
-              backgroundColor: AppColors.azulClaro,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(3),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Título del diálogo
+              const Text(
+                'Términos y Condiciones',
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black,
+                ),
               ),
-            ),
-            child: const Text('Aceptar'),
+              const SizedBox(height: 15),
+
+              // Descripción inicial
+              const Text(
+                "Antes de continuar, te invitamos a leer nuestros Términos y Condiciones. \nAl aceptar, confirmarás estar de acuerdo con nuestras políticas, las cuales estarán vigentes de inmediato. Esto nos ayuda a garantizar una experiencia segura, transparente y confiable para todos los usuarios.",
+                style: TextStyle(
+                  fontSize: 13,
+                  color: Colors.black87,
+                  height: 1.2,
+                ),
+              ),
+              const SizedBox(height: 20),
+
+              ElevatedButton.icon(
+                onPressed: () {
+                  // Get.to(() => TermsAndConditionsScreen());
+                  Get.toNamed(AppRoutes.termsAndPolitics);
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.gris,
+                  foregroundColor: AppColors.blanco,
+                  elevation: 3,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                ),
+                icon: const Icon(Icons.description_outlined, size: 20),
+                label: const Text(
+                  'Leer Términos y Condiciones',
+                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+                ),
+              ),
+              const SizedBox(height: 30),
+
+              // Botones de acción
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  // Botón de cancelar
+                  TextButton(
+                    onPressed: () {
+                      Get.back();
+                    },
+                    child: const Text(
+                      'Cancelar',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.redAccent,
+                      ),
+                    ),
+                  ),
+                  // Botón de aceptar
+                  ElevatedButton(
+                    onPressed: () async {
+                      Get.back();
+                      await onAccept();
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.verdeNavbar,
+                      foregroundColor: AppColors.blanco,
+                      elevation: 3,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 12, horizontal: 16),
+                    ),
+                    child: const Text(
+                      'Aceptar',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
@@ -166,22 +233,6 @@ class CreateAccountController extends GetxController {
           '¡Error al crear la cuenta! \n Puede que este correo ya este registrado');
     } finally {
       isLoadingButton.value = false;
-    }
-  }
-
-  Future<void> _fetchData() async {
-    try {
-      DocumentSnapshot document = await FirebaseFirestore.instance
-          .collection('DataApp')
-          .doc('politicasDePrivacidad')
-          .get();
-      if (document.exists) {
-        termsAndConditions.value = document['tyc'];
-      } else {
-        termsAndConditions.value = 'No se encontraron términos y condiciones.';
-      }
-    } catch (e) {
-      termsAndConditions.value = 'Error al cargar los datos.';
     }
   }
 

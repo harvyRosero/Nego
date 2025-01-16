@@ -4,6 +4,7 @@ class SelectedProductData {
   double precio;
   double promo;
   String imagen;
+  String categoria;
   double total;
   int cantidad;
 
@@ -13,6 +14,7 @@ class SelectedProductData {
     required this.precio,
     required this.promo,
     required this.imagen,
+    required this.categoria,
     required this.total,
     required this.cantidad,
   });
@@ -24,6 +26,7 @@ class SelectedProductData {
       'precio': precio,
       'promo': promo,
       'imagen': imagen,
+      'categoria': categoria,
       'total': total,
       'cantidad': cantidad,
     };
@@ -36,6 +39,7 @@ class SelectedProductData {
       precio: (map['precio'] as num?)?.toDouble() ?? 0.0,
       promo: (map['promo'] as num?)?.toDouble() ?? 0.0,
       imagen: map['imagen'] ?? '',
+      categoria: map['categoria'] ?? '',
       total: (map['total'] as num?)?.toDouble() ?? 0.0,
       cantidad: map['cantidad'] ?? 0,
     );

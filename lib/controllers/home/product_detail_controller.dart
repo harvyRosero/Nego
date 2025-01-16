@@ -24,11 +24,12 @@ class ProductDetailController extends GetxController {
   var img = ''.obs;
   var estado = ''.obs;
   var pId = ''.obs;
+  var flag = ''.obs;
 
   @override
-  void onInit() {
+  void onInit() async {
     super.onInit();
-    obtenerProductos(); // Cargar los productos cuando el controlador se inicializa
+    await obtenerProductos();
   }
 
   void addToCart(SelectedProductData product) async {
@@ -37,25 +38,30 @@ class ProductDetailController extends GetxController {
     }
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? productListStr = prefs.getString('productos');
+    String? category0 = prefs.getString('category');
+
     List<dynamic> productList =
         productListStr != null ? json.decode(productListStr) : [];
 
-    productList.removeWhere((item) => item['pId'] == product.pId);
+    if (product.categoria == category0) {
+      productList.removeWhere((item) => item['pId'] == product.pId);
+    } else {
+      productList.clear();
+      await prefs.remove('productos');
+    }
 
     productList.add(product.toMap());
-
     await prefs.setString('productos', json.encode(productList));
+    await prefs.setString('category', category.value);
+
     cartItemController.itemCount.value = productList.length;
     Get.snackbar('Informacion', 'Se agrego un producto');
-  }
-
-  void getCategory(String category2) {
-    category.value = category2;
   }
 
   Future<void> getArguments(Map<String, dynamic> arguments) async {
     pId.value = arguments['pId'];
     category.value = arguments['category'];
+    flag.value = arguments['flag'];
     fetchProductById(pId.value);
   }
 

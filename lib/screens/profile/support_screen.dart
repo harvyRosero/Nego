@@ -25,11 +25,13 @@ class SupportScreen extends StatelessWidget {
             const SizedBox(height: 10),
             _buildSubtitle("Escríbenos"),
             const SizedBox(height: 10),
-            _buildContactOption(
-              label: 'WhatsApp',
-              imageUrl:
-                  'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/WhatsApp_icon.png/598px-WhatsApp_icon.png',
-            ),
+            Obx(() {
+              return _buildContactOption(
+                label: supportController.whatsapp.value,
+                imageUrl:
+                    'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/WhatsApp_icon.png/598px-WhatsApp_icon.png',
+              );
+            }),
             const SizedBox(height: 20),
             _buildSubtitle("Comunicate con nosotros"),
             const SizedBox(height: 10),

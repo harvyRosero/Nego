@@ -14,6 +14,7 @@ import 'package:agro/screens/profile/terms_and_politics_screen.dart';
 import 'package:agro/widgets/home/detail_product_widget.dart';
 import 'package:agro/screens/home/shopping_cart_screen.dart';
 import 'package:agro/screens/billing_screen.dart';
+import 'package:agro/screens/company_screen.dart';
 
 class AppRoutes {
   static const String preLogin = '/';
@@ -31,6 +32,7 @@ class AppRoutes {
   static const String detailProduct = '/detailProduct';
   static const String shoppingCart = '/shoppingCart';
   static const String billing = '/billing';
+  static const String company = '/company';
 
   static final routes = [
     GetPage(name: preLogin, page: () => const PreLoginScreen()),
@@ -48,5 +50,6 @@ class AppRoutes {
     GetPage(name: shoppingCart, page: () => ShoppingCartScreen()),
     GetPage(name: billing, page: () => BillingScreen()),
     GetPage(name: search, page: () => SearchScreen()),
+    GetPage(name: company, page: () => CompanyScreen()),
   ];
 }

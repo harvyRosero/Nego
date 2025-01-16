@@ -9,7 +9,7 @@ import 'package:agro/models/order_model.dart';
 
 class BillingController extends GetxController {
   final CartItemController cartItemController = Get.find<CartItemController>();
-
+  var isAgree = false.obs;
   var userName = ''.obs;
   var uid = ''.obs;
   var gmail = ''.obs;
@@ -21,14 +21,22 @@ class BillingController extends GetxController {
   var detallesUbicacion = ''.obs;
   var barrio = ''.obs;
   var appState = ''.obs;
+  var key = ''.obs;
+  var key0 = ''.obs;
+  var value1 = ''.obs;
+  var value0 = ''.obs;
+  var category = ''.obs;
+  var statusPayP = false.obs;
+  var costoDom = 0.obs;
 
   RxList<SelectedProductData> cartProducts = <SelectedProductData>[].obs;
   RxDouble totalSum = 0.0.obs;
 
   @override
-  void onInit() {
+  void onInit() async {
     super.onInit();
-    getUserData();
+    await getUserData();
+    await _getDomicilioFromBusiness();
     _loadCartProducts();
   }
 
@@ -44,6 +52,7 @@ class BillingController extends GetxController {
     ciudad.value = prefs.getString('ciudad') ?? '';
     celular.value = prefs.getString('celular') ?? '';
     barrio.value = prefs.getString('barrio') ?? '';
+    category.value = prefs.getString('category') ?? '';
   }
 
   Future<void> _loadCartProducts() async {
@@ -62,7 +71,7 @@ class BillingController extends GetxController {
     for (var product in cartProducts) {
       sum += product.total;
     }
-    totalSum.value = sum;
+    totalSum.value = sum + costoDom.value;
   }
 
   Future<void> sendOrderToFirebase() async {
@@ -90,6 +99,7 @@ class BillingController extends GetxController {
       celular: celular.value,
       detallesUbicacion: detallesUbicacion.value,
       barrio: barrio.value,
+      category: category.value,
       state: 'Pedido recibido',
       deliveryId: '',
       totalSum: totalSum.value,
@@ -108,6 +118,7 @@ class BillingController extends GetxController {
   void _clearCart() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.remove('productos');
+    await prefs.remove('category');
   }
 
   Future<String?> _getEstadoFromServicio() async {
@@ -126,6 +137,25 @@ class BillingController extends GetxController {
       }
     } catch (e) {
       return null;
+    }
+  }
+
+  Future<void> _getDomicilioFromBusiness() async {
+    String cadena = '${category.value}${ciudad.value}';
+    try {
+      DocumentSnapshot<Map<String, dynamic>> docSnapshot =
+          await FirebaseFirestore.instance
+              .collection('Bussiness')
+              .doc(cadena)
+              .get();
+
+      if (docSnapshot.exists && docSnapshot.data() != null) {
+        costoDom.value = docSnapshot.data()!['Domicilio'];
+      } else {
+        Get.snackbar('Error', 'No se obtuvieron algunos datos');
+      }
+    } catch (e) {
+      Get.snackbar('Error', 'Error al obtener domicilio: $e');
     }
   }
 }

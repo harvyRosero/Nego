@@ -44,28 +44,42 @@ class ProductCard extends StatelessWidget {
       onTap: () {
         Get.toNamed(
           AppRoutes.detailProduct,
-          arguments: {'pId': productId, 'category': category},
+          arguments: {
+            'pId': productId,
+            'category': category,
+            'flag': 'false',
+          },
         );
       },
-      child: AspectRatio(
-        aspectRatio: 0.65,
-        child: Card(
-          color: AppColors.blanco,
-          elevation: 3.0,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10.0),
-          ),
-          child: Stack(
-            children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  ClipRRect(
-                      borderRadius: const BorderRadius.vertical(
-                          top: Radius.circular(16.0)),
-                      child: AspectRatio(
-                        aspectRatio:
-                            1.0, // Ajusta la proporción según necesites
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final double width = constraints.maxWidth;
+          final double height = constraints.maxHeight;
+
+          // Escala base para calcular tamaños
+          // final double textScaleFactor = MediaQuery.of(context).textScaleFactor;
+
+          // Tamaño mínimo para las fuentes (en caso de dispositivos muy pequeños)
+          final double baseFontSize = (width * 0.045).clamp(14.0, 22.0);
+
+          return Card(
+            color: AppColors.blanco,
+            elevation: 3.0,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(width * 0.03),
+            ),
+            child: Stack(
+              children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    ClipRRect(
+                      borderRadius: BorderRadius.vertical(
+                        top: Radius.circular(width * 0.03),
+                      ),
+                      child: SizedBox(
+                        height: height * 0.55,
+                        width: double.infinity,
                         child: Image.network(
                           productImage,
                           fit: BoxFit.cover,
@@ -82,77 +96,67 @@ class ProductCard extends StatelessWidget {
                             child: Icon(Icons.error, color: Colors.red),
                           ),
                         ),
-                      )),
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
+                      ),
+                    ),
+                    Padding(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: width * 0.04,
+                        vertical: height * 0.015,
+                      ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Expanded(
-                            child: Text(
-                              productName,
+                          Text(
+                            productName,
+                            style: TextStyle(
+                              fontSize: baseFontSize * 1.2, // Ajuste dinámico
+                              fontWeight: FontWeight.bold,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          SizedBox(height: height * 0.01),
+                          if (productPromo > 0) ...[
+                            Text(
+                              currencyFormat.format(productPromo),
                               style: TextStyle(
-                                fontSize:
-                                    MediaQuery.of(context).size.width * 0.047,
+                                color: AppColors.verdeLetras,
+                                fontSize: baseFontSize,
                                 fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            SizedBox(height: height * 0.005),
+                            Text(
+                              currencyFormat.format(productPrice),
+                              style: TextStyle(
+                                fontSize: baseFontSize * 0.8,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.red,
+                                decoration: TextDecoration.lineThrough,
+                              ),
+                            ),
+                          ] else ...[
+                            Text(
+                              productDescription,
+                              maxLines: 1,
+                              style: TextStyle(
+                                fontSize: baseFontSize * 0.9,
+                                fontWeight: FontWeight.w500,
+                                color: AppColors.grisLetras,
                               ),
                               overflow: TextOverflow.ellipsis,
                             ),
-                          ),
-                          productPromo > 0
-                              ? Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      currencyFormat.format(productPromo),
-                                      style: TextStyle(
-                                        color: AppColors.verdeLetras,
-                                        fontSize:
-                                            MediaQuery.of(context).size.width *
-                                                0.035,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                    Text(
-                                      currencyFormat.format(productPrice),
-                                      style: TextStyle(
-                                        fontSize:
-                                            MediaQuery.of(context).size.width *
-                                                0.025,
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.red,
-                                        decoration: TextDecoration.lineThrough,
-                                      ),
-                                    ),
-                                  ],
-                                )
-                              : Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      productDescription,
-                                      maxLines: 1,
-                                      style: TextStyle(
-                                          fontSize: MediaQuery.of(context)
-                                                  .size
-                                                  .width *
-                                              0.03,
-                                          fontWeight: FontWeight.w500,
-                                          color: AppColors.grisLetras),
-                                    ),
-                                    Text(
-                                      currencyFormat.format(productPrice),
-                                      style: TextStyle(
-                                          fontSize: MediaQuery.of(context)
-                                                  .size
-                                                  .width *
-                                              0.035,
-                                          fontWeight: FontWeight.bold,
-                                          color: AppColors.grisLetras),
-                                    ),
-                                  ],
-                                ),
+                            SizedBox(height: height * 0.005),
+                            Text(
+                              currencyFormat.format(productPrice),
+                              style: TextStyle(
+                                fontSize: baseFontSize,
+                                fontWeight: FontWeight.bold,
+                                color: AppColors.grisLetras,
+                              ),
+                            ),
+                          ],
+                          SizedBox(height: height * 0.01),
                           Row(
                             children: List.generate(5, (index) {
                               return Icon(
@@ -160,43 +164,45 @@ class ProductCard extends StatelessWidget {
                                     ? Icons.star
                                     : Icons.star_border,
                                 color: Colors.amber,
-                                size: 12,
+                                size: baseFontSize * 0.8, // Escala de ícono
                               );
                             }),
                           ),
                         ],
                       ),
                     ),
-                  ),
-                ],
-              ),
-              if (productPromo > 0)
-                Positioned(
-                  top: 0,
-                  left: 0,
-                  child: Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    decoration: const BoxDecoration(
-                      color: Colors.redAccent,
-                      borderRadius: BorderRadius.only(
-                        topLeft: Radius.circular(16),
-                        bottomRight: Radius.circular(16),
-                      ),
-                    ),
-                    child: Text(
-                      'Promo',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: MediaQuery.of(context).size.width * 0.03,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
+                  ],
                 ),
-            ],
-          ),
-        ),
+                if (productPromo > 0)
+                  Positioned(
+                    top: 0,
+                    left: 0,
+                    child: Container(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: width * 0.03,
+                        vertical: height * 0.008,
+                      ),
+                      decoration: const BoxDecoration(
+                        color: Colors.redAccent,
+                        borderRadius: BorderRadius.only(
+                          topLeft: Radius.circular(10),
+                          bottomRight: Radius.circular(10),
+                        ),
+                      ),
+                      child: Text(
+                        'Promo',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: baseFontSize * 0.8,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          );
+        },
       ),
     );
   }

@@ -12,6 +12,7 @@ class MyOrder {
   final String celular;
   final String detallesUbicacion;
   final String barrio;
+  final String category;
   final String state;
   final String deliveryId;
   final double totalSum;
@@ -29,6 +30,7 @@ class MyOrder {
     required this.celular,
     required this.detallesUbicacion,
     required this.barrio,
+    required this.category,
     required this.state,
     required this.deliveryId,
     required this.totalSum,
@@ -48,6 +50,7 @@ class MyOrder {
       'celular': celular,
       'detallesUbicacion': detallesUbicacion,
       'barrio': barrio,
+      'category': category,
       'totalSum': totalSum,
       'state': state,
       'deliveryId': deliveryId,
@@ -69,6 +72,7 @@ class MyOrder {
       detallesUbicacion: map['detallesUbicacion'] ?? '',
       barrio: map['barrio'] ?? '',
       state: map['state'] ?? '',
+      category: map['category'] ?? '',
       deliveryId: map['deliveryId'] ?? '',
       totalSum: map['totalSum']?.toDouble() ?? 0.0,
       products: List<SelectedProductData>.from(

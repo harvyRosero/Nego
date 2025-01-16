@@ -1,3 +1,4 @@
+import 'package:agro/routes/app_routes.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -42,7 +43,7 @@ class DetailProductWidget extends StatelessWidget {
             const SizedBox(height: 16.0),
             _buildProductDetails(context),
             const SizedBox(height: 16.0),
-            _buildStockAndCategory(context),
+            _buildCategory(context),
             const SizedBox(height: 16.0),
             _buildRating(),
             const SizedBox(height: 8.0),
@@ -223,34 +224,55 @@ class DetailProductWidget extends StatelessWidget {
     });
   }
 
-  Widget _buildStockAndCategory(BuildContext context) {
+  Widget _buildCategory(BuildContext context) {
     return Obx(() {
-      return Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Chip(
-            label: Text(
-              'Stock: ${controller.stock.value}',
-              style: TextStyle(
-                color: controller.stock.value > 0
-                    ? AppColors.verdeNavbar
-                    : Colors.red,
-                fontWeight: FontWeight.w600,
-              ),
+      return GestureDetector(
+        onTap: () {
+          if (controller.flag.value != 'true') {
+            Get.offNamed(AppRoutes.company,
+                arguments: {'category': controller.category.value});
+          }
+        },
+        child: Column(
+          children: [
+            controller.flag.value == 'true'
+                ? Container()
+                : const Text(
+                    "Ver mas",
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.grisLetras,
+                    ),
+                  ),
+            const SizedBox(height: 8),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(
+                  Icons.arrow_forward,
+                  color: Colors.grey,
+                  size: 25,
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  controller.category.value,
+                  style: const TextStyle(
+                    color: AppColors.verdeNavbar,
+                    fontSize: 26,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                const Icon(
+                  Icons.arrow_back,
+                  color: Colors.grey,
+                  size: 25,
+                ),
+              ],
             ),
-            backgroundColor: Colors.grey[200],
-          ),
-          Chip(
-            label: Text(
-              'Categoría: ${controller.category.value}',
-              style: Theme.of(context)
-                  .textTheme
-                  .bodyMedium
-                  ?.copyWith(color: Colors.grey[700]),
-            ),
-            backgroundColor: Colors.grey[200],
-          ),
-        ],
+          ],
+        ),
       );
     });
   }
@@ -427,6 +449,7 @@ class DetailProductWidget extends StatelessWidget {
                     precio: price0,
                     promo: promo,
                     imagen: controller.img.value,
+                    categoria: controller.category.value,
                     total: controller.quantity.value == 1
                         ? price
                         : controller.totalValue.value,

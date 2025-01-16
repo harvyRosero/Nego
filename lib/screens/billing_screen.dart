@@ -7,7 +7,7 @@ import 'package:intl/intl.dart';
 
 class BillingScreen extends StatelessWidget {
   BillingScreen({super.key});
-  final BillingController billingController = Get.put(BillingController());
+  final BillingController controller = Get.put(BillingController());
 
   @override
   Widget build(BuildContext context) {
@@ -34,20 +34,20 @@ class BillingScreen extends StatelessWidget {
                     ),
               ),
               const SizedBox(height: 16),
+              Obx(() =>
+                  _buildBillingDetailRow('Nombre', controller.userName.value)),
               Obx(() => _buildBillingDetailRow(
-                  'Nombre', billingController.userName.value)),
+                  'Dirección', controller.direccion.value)),
+              Obx(() =>
+                  _buildBillingDetailRow('Teléfono', controller.celular.value)),
               Obx(() => _buildBillingDetailRow(
-                  'Dirección', billingController.direccion.value)),
+                  'Correo Electrónico', controller.gmail.value)),
+              Obx(() =>
+                  _buildBillingDetailRow('Ciudad', controller.ciudad.value)),
+              Obx(() =>
+                  _buildBillingDetailRow('Barrio', controller.barrio.value)),
               Obx(() => _buildBillingDetailRow(
-                  'Teléfono', billingController.celular.value)),
-              Obx(() => _buildBillingDetailRow(
-                  'Correo Electrónico', billingController.gmail.value)),
-              Obx(() => _buildBillingDetailRow(
-                  'Ciudad', billingController.ciudad.value)),
-              Obx(() => _buildBillingDetailRow(
-                  'Barrio', billingController.barrio.value)),
-              Obx(() => _buildBillingDetailRow('Detalles de Ubicación',
-                  billingController.detallesUbicacion.value)),
+                  'Detalles de Ubicación', controller.detallesUbicacion.value)),
               const SizedBox(height: 20),
               Row(
                 children: [
@@ -57,11 +57,11 @@ class BillingScreen extends StatelessWidget {
                       Get.toNamed(
                         AppRoutes.configAddress,
                         arguments: {
-                          'barrio': billingController.barrio.value,
-                          'direccion': billingController.direccion.value,
+                          'barrio': controller.barrio.value,
+                          'direccion': controller.direccion.value,
                           'detallesDireccion':
-                              billingController.detallesUbicacion.value,
-                          'celular': billingController.celular.value,
+                              controller.detallesUbicacion.value,
+                          'celular': controller.celular.value,
                         },
                       );
                     },
@@ -95,25 +95,75 @@ class BillingScreen extends StatelessWidget {
               ),
               const SizedBox(height: 16),
               Obx(() => Column(
-                    children: billingController.cartProducts.map((product) {
+                    children: controller.cartProducts.map((product) {
                       return _buildOrderDetailRow(
                         '${product.nombre} (x${product.cantidad})',
                         currencyFormat.format(product.total),
                       );
                     }).toList(),
                   )),
+              Obx(() => _buildOrderDetailRow(
+                    'Costo Domicilio',
+                    currencyFormat.format(controller.costoDom.value),
+                  )),
               const Divider(height: 32),
               Obx(() => _buildOrderDetailRow(
                     'Total',
-                    currencyFormat.format(billingController.totalSum.value),
+                    currencyFormat.format(controller.totalSum.value),
                     isTotal: true,
                   )),
               const SizedBox(height: 24),
               Center(
                 child: ElevatedButton(
                   onPressed: () {
-                    billingController.sendOrderToFirebase();
-                    Get.offAllNamed(AppRoutes.home);
+                    // Mostrar cuadro de diálogo de confirmación
+                    Get.defaultDialog(
+                      title: '¿Confirmas tu Pedido?',
+                      titleStyle: const TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.verdeNavbar,
+                      ),
+                      content: const Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          SizedBox(height: 10),
+                          Icon(
+                            Icons.warning_amber_rounded,
+                            color: Colors.redAccent,
+                            size: 60,
+                          ),
+                          SizedBox(height: 20),
+                          Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 12.0),
+                            child: Text(
+                              'Al confirmar este pedido, aceptas realizar el pago al recibirlo. '
+                              'Incumplir con el pago puede resultar en la inhabilitación de tu cuenta y posibles acciones legales según nuestras políticas.',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: Colors.black87,
+                                height: 1.5,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      textConfirm: 'Confirmar Pedido',
+                      textCancel: 'Cancelar',
+                      confirmTextColor: Colors.white,
+                      cancelTextColor: AppColors.grisLetras,
+                      buttonColor: AppColors.verdeNavbar,
+                      onConfirm: () {
+                        controller.sendOrderToFirebase();
+                        Get.offAllNamed(AppRoutes.home);
+                      },
+                      onCancel: () {
+                        Get.back();
+                      },
+                      radius: 10,
+                      barrierDismissible: false,
+                    );
                   },
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(
@@ -122,16 +172,25 @@ class BillingScreen extends StatelessWidget {
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8),
                     ),
+                    elevation: 4,
                   ),
-                  child: const Text(
-                    'Pagar',
-                    style: TextStyle(
-                      fontSize: 18,
-                      color: Colors.white,
-                    ),
+                  child: const Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.lock, color: Colors.white),
+                      SizedBox(width: 8),
+                      Text(
+                        'Pagar contra entrega',
+                        style: TextStyle(
+                          fontSize: 18,
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-              ),
+              )
             ],
           ),
         ),

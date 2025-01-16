@@ -39,6 +39,18 @@ class ShoppingCartScreen extends StatelessWidget {
       ),
       body: Column(
         children: [
+          Obx(() {
+            return Text(
+              _controller.category.value,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: AppColors.verdeNavbar,
+                fontFamily: 'Roboto',
+              ),
+            );
+          }),
           Expanded(
             child: Obx(() {
               if (_controller.cartProducts.isEmpty) {
@@ -64,6 +76,8 @@ class ShoppingCartScreen extends StatelessWidget {
                           AppRoutes.detailProduct,
                           arguments: {
                             'pId': product.pId,
+                            'category': product.categoria,
+                            'flag': 'false',
                           },
                         );
                       },

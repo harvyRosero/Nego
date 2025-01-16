@@ -8,6 +8,7 @@ class ShoppingCartController extends GetxController {
   RxList<SelectedProductData> cartProducts = <SelectedProductData>[].obs;
   final CartItemController cartItemController = Get.find<CartItemController>();
   RxDouble totalSum = 0.0.obs;
+  var category = ''.obs;
 
   @override
   void onInit() {
@@ -18,6 +19,7 @@ class ShoppingCartController extends GetxController {
   Future<void> loadCartProducts() async {
     final prefs = await SharedPreferences.getInstance();
     String? productListStr = prefs.getString('productos');
+    category.value = prefs.getString('category') ?? '';
     if (productListStr != null) {
       List<dynamic> productList = json.decode(productListStr);
       cartProducts.value =

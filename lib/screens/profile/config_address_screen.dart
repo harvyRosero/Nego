@@ -160,7 +160,7 @@ class ConfigAddressScreen extends StatelessWidget {
         child: TextField(
           controller: controller,
           decoration: InputDecoration(
-            hintText: value != '' ? value : hintText,
+            hintText: value != '' ? "$hintText: $value" : hintText,
             hintStyle: TextStyle(fontSize: hintSize, color: AppColors.gris),
             border: InputBorder.none,
             contentPadding: const EdgeInsets.symmetric(vertical: 20),

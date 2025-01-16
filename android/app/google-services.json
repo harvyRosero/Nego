@@ -1,18 +1,71 @@
 {
   "project_info": {
     "project_number": "71771128480",
+    "firebase_url": "https://nego-becb9-default-rtdb.firebaseio.com",
     "project_id": "nego-becb9",
     "storage_bucket": "nego-becb9.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:71771128480:android:acd6cea9e107ba31f37fc5",
+        "mobilesdk_app_id": "1:71771128480:android:a9899e31a0ece8d8f37fc5",
         "android_client_info": {
-          "package_name": "com.example.agro"
+          "package_name": "com.example.admin_nego"
         }
       },
       "oauth_client": [
+        {
+          "client_id": "71771128480-48jjspalhggj76t4uh60nfcrnks3cspt.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.admin_nego",
+            "certificate_hash": "dab51cf5b4976a5a6eaea8f1d8bc07319be66d26"
+          }
+        },
+        {
+          "client_id": "71771128480-5rtk85kfd3b57t7k4eg9pr87pd9av7qq.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCvmu5rpqSSmCXBwUOXdusWxPeuHnIkyeA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "71771128480-5rtk85kfd3b57t7k4eg9pr87pd9av7qq.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "71771128480-0eqcb39hhcsqlahl1rnvked99sc609e4.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.agro.RunnerTests"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:71771128480:android:34c9c99de906adfdf37fc5",
+        "android_client_info": {
+          "package_name": "com.hasaro.nego"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "71771128480-hmk0hq0uq6d76dnoib6kukptu4ve60qo.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.hasaro.nego",
+            "certificate_hash": "dab51cf5b4976a5a6eaea8f1d8bc07319be66d26"
+          }
+        },
         {
           "client_id": "71771128480-5rtk85kfd3b57t7k4eg9pr87pd9av7qq.apps.googleusercontent.com",
           "client_type": 3

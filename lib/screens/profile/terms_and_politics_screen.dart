@@ -1,63 +1,13 @@
-import 'package:agro/utils/app_colors.dart';
 import 'package:flutter/material.dart';
-import 'package:agro/controllers/profile/terms_and_politics_controller.dart';
 import 'package:get/get.dart';
+import 'package:agro/utils/app_colors.dart';
+import 'package:agro/controllers/profile/terms_and_politics_controller.dart';
 
 class TermsAndPoliticsScreen extends StatelessWidget {
-  TermsAndPoliticsScreen({super.key});
-  final TermsAndPoliticsController termsAndPoliticsController =
+  final TermsAndPoliticsController _controller =
       Get.put(TermsAndPoliticsController());
 
-  void _showDialog(BuildContext context, String title, String content) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          titlePadding: const EdgeInsets.all(20),
-          contentPadding: EdgeInsets.zero,
-          actionsPadding:
-              const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-          title: Text(
-            title,
-            style: const TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          content: Container(
-            width: double.maxFinite,
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-            child: SingleChildScrollView(
-              child: Text(
-                content,
-                style:
-                    const TextStyle(fontSize: 12, fontWeight: FontWeight.w400),
-              ),
-            ),
-          ),
-          actions: [
-            ElevatedButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.verdeNavbar, // Color del botón
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              ),
-              child: const Text('Cerrar'),
-            ),
-          ],
-        );
-      },
-    );
-  }
+  TermsAndPoliticsScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -68,22 +18,66 @@ class TermsAndPoliticsScreen extends StatelessWidget {
       body: Padding(
         padding: const EdgeInsets.all(20.0),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Obx(() {
-              return _buildButton(
-                context,
-                'Términos y condiciones',
-                Icons.article,
-                termsAndPoliticsController.tyc.value,
-              );
-            }),
+            Obx(() => _buildButton(
+                  context,
+                  'Términos y condiciones',
+                  Icons.article,
+                  () => _controller.updateDataList('tyc'),
+                  _controller.selectedButton.value == 'tyc',
+                )),
             const SizedBox(height: 10),
+            Obx(() => _buildButton(
+                  context,
+                  'Política de privacidad',
+                  Icons.privacy_tip,
+                  () => _controller.updateDataList('pdp'),
+                  _controller.selectedButton.value == 'pdp',
+                )),
+            const SizedBox(height: 20),
+
+            // Mostrar imágenes solo cuando `showImages` sea true
             Obx(() {
-              return _buildButton(
-                context,
-                'Política de privacidad',
-                Icons.privacy_tip,
-                termsAndPoliticsController.pdp.value,
+              if (_controller.isLoading.value) {
+                return const Center(child: CircularProgressIndicator());
+              }
+
+              if (!_controller.showImages.value) {
+                return const SizedBox.shrink();
+              }
+
+              final dataList = _controller.selectedCategory.value == 'pdp'
+                  ? _controller.dataList
+                  : _controller.dataListTyc;
+
+              return Expanded(
+                child: ListView.builder(
+                  itemCount: dataList.length,
+                  itemBuilder: (context, index) {
+                    String imageUrl = dataList[index].values.first;
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 10.0),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(12),
+                        child: Image.network(
+                          imageUrl,
+                          fit: BoxFit.cover,
+                          width: double.infinity,
+                          loadingBuilder: (context, child, progress) {
+                            if (progress == null) return child;
+                            return const Center(
+                                child: CircularProgressIndicator());
+                          },
+                          errorBuilder: (context, error, stackTrace) {
+                            return const Center(
+                                child: Text('Error al cargar la imagen'));
+                          },
+                        ),
+                      ),
+                    );
+                  },
+                ),
               );
             }),
           ],
@@ -92,14 +86,15 @@ class TermsAndPoliticsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildButton(
-      BuildContext context, String text, IconData icon, String content) {
+  Widget _buildButton(BuildContext context, String text, IconData icon,
+      VoidCallback onPressed, bool isSelected) {
     return SizedBox(
       width: double.infinity,
       child: ElevatedButton(
-        onPressed: () => _showDialog(context, text, content),
+        onPressed: onPressed,
         style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.grisClaro2,
+          backgroundColor:
+              isSelected ? AppColors.verdeNavbar : AppColors.grisClaro2,
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
           textStyle: const TextStyle(fontSize: 16),
           shape: RoundedRectangleBorder(
@@ -109,9 +104,17 @@ class TermsAndPoliticsScreen extends StatelessWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Icon(icon, color: AppColors.verdeNavbar),
-            Text(text, style: const TextStyle(color: AppColors.verdeNavbar)),
-            const Icon(Icons.arrow_forward_ios, color: AppColors.verdeNavbar),
+            Icon(icon,
+                color: isSelected ? Colors.white : AppColors.verdeNavbar),
+            Text(
+              text,
+              style: TextStyle(
+                  color: isSelected ? Colors.white : AppColors.verdeNavbar),
+            ),
+            Icon(
+              Icons.arrow_forward_ios,
+              color: isSelected ? Colors.white : AppColors.verdeNavbar,
+            ),
           ],
         ),
       ),

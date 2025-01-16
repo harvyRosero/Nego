@@ -6,6 +6,7 @@ class SupportController extends GetxController {
   var supportData = {}.obs;
   var gmail = ''.obs;
   var telefono = ''.obs;
+  var whatsapp = ''.obs;
 
   @override
   void onInit() {
@@ -21,9 +22,11 @@ class SupportController extends GetxController {
         supportData.value = supportDoc.data() as Map<String, dynamic>;
         String telefono2 = supportData['telefono'];
         String gmail2 = supportData['gmail'];
+        String whatsApp = supportData['whatsapp'];
 
         gmail.value = gmail2;
         telefono.value = telefono2;
+        whatsapp.value = whatsApp;
       }
     } catch (e) {
       Get.snackbar('Error (sc)', 'No se pudo obtener datos de contacto.');
